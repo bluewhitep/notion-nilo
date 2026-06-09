@@ -19,7 +19,7 @@ notion-mcp config --global user.name "Ada"
 notion-mcp config --global --show
 ```
 
-如果你在旧文档或旧脚本中看到 `set-token`、`set-user`、`show` 或 `run`，它们是 legacy 兼容命令；说明见 [Configuration](Configuration.md) 的 “Legacy 兼容入口”。
+新的配置命令统一使用 `notion-mcp config --global ...`。
 
 ## 使用 uv 安装
 

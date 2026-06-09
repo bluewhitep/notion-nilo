@@ -6,7 +6,7 @@ from notion_mcp.server import app
 
 
 def test_legacy_fastapi_root_still_responds() -> None:
-    """The legacy FastAPI root route must remain importable during phase 0."""
+    """The internal REST prototype root route remains importable for compatibility tests."""
     client = TestClient(app)
 
     response = client.get("/")
@@ -16,7 +16,7 @@ def test_legacy_fastapi_root_still_responds() -> None:
 
 
 def test_legacy_fastapi_openapi_includes_existing_routes() -> None:
-    """The legacy REST route inventory is frozen while packaging is repaired."""
+    """The internal REST prototype route inventory remains stable for compatibility tests."""
     client = TestClient(app)
 
     response = client.get("/openapi.json")

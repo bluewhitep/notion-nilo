@@ -29,7 +29,6 @@ def test_stage7_required_documentation_files_exist() -> None:
         "Docs/User/Cli/Search_And_Custom_Emoji.md",
         "Docs/User/Cli/Raw_API.md",
         "Docs/User/Cli/MCP_Server.md",
-        "Docs/User/Cli/Legacy_Commands.md",
         "Docs/User/MCP_Clients.md",
         "Docs/User/Troubleshooting.md",
     ]

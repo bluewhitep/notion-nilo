@@ -7,6 +7,6 @@ Current state:
 - Core is the only business logic layer.
 - CLI is the git-like human entrypoint.
 - MCP tools are the structured Agent/LLM entrypoint.
-- Legacy FastAPI REST routes are retained only for compatibility.
+- Background MCP server lifecycle commands are available through `notion-mcp server ...`.
 
 Use `Docs/User/Installation.md` and `Docs/User/MCP_Clients.md` for setup and client configuration.

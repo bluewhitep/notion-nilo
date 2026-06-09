@@ -1,11 +1,11 @@
 # 开发者接口索引
 
-本文档面向开发者，说明当前仓库的接口文档入口。当前项目已经从 legacy FastAPI REST 原型补全为本地 Notion MCP 服务器；legacy REST 入口仍保留用于兼容。
+本文档面向开发者，说明当前仓库的接口文档入口。当前项目已经从 REST 原型补全为本地 Notion MCP 服务器。
 
 ## 当前接口状态
 
-- `src/notion_mcp/core/`：唯一业务逻辑层，供 CLI、MCP Tool 和 legacy 兼容入口复用。
-- `src/notion_mcp/server.py` 与 `src/notion_mcp/routes/`：保留为 legacy FastAPI REST 兼容入口，不是最终 MCP Tool 接口。
+- `src/notion_mcp/core/`：唯一业务逻辑层，供 CLI、MCP Tool 和兼容代码复用。
+- `src/notion_mcp/server.py` 与 `src/notion_mcp/routes/`：内部 REST 原型兼容代码，不是公开 server CLI 入口，也不是最终 MCP Tool 接口。
 - `src/notion_mcp/cli/`：git-like CLI，人类入口，调用 Core。
 - `src/notion_mcp/mcp_server/`：MCP server 和 MCP tools，Agent/LLM 结构化入口，调用 Core。
 

@@ -4,7 +4,7 @@
 
 ## 当前目标
 
-本仓库提供本地运行的 Notion MCP server，并保留 legacy FastAPI REST 兼容入口。当前实现围绕以下三层展开：
+本仓库提供本地运行的 Notion MCP server。当前实现围绕以下三层展开：
 
 - Core：唯一业务逻辑层。
 - CLI：面向人类的 git-like 本地命令入口。
@@ -17,7 +17,6 @@
 ```text
 Human -> CLI -> Core
 Agent / LLM -> MCP Tool -> Core
-Legacy REST -> Core-compatible adapter or legacy compatibility layer
 ```
 
 必须保持：
@@ -65,7 +64,18 @@ CLI 是人类入口，负责：
 - 普通文本输出。
 - `--json` 输出。
 - `--dry-run`。
-- 启动 MCP server。
+- 启动和管理 MCP server。
+
+公开 server 命令包括：
+
+```text
+notion-mcp server run
+notion-mcp server status
+notion-mcp server stop
+notion-mcp server logs
+notion-mcp server remove
+notion-mcp server stdio
+```
 
 CLI resource command 通过 Core service 调用 Notion 能力。
 
@@ -82,10 +92,6 @@ MCP Tool 是 Agent/LLM 入口，负责：
 - 危险操作确认。
 
 MCP Tool 直接调用 Core service，不拼 CLI 字符串。
-
-## Legacy REST
-
-legacy FastAPI REST 路由仍保留，用于旧测试和旧入口兼容。它不是最终 MCP 接口。
 
 ## 非功能边界
 

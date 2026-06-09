@@ -38,4 +38,4 @@ def test_uv_isolated_install_exposes_cli_help(tmp_path: Path) -> None:
     combined_output = result.stdout + result.stderr
     assert "notion-mcp" in combined_output or "Notion MCP" in combined_output
     assert "init" in combined_output
-    assert "run" in combined_output
+    assert "server" in combined_output

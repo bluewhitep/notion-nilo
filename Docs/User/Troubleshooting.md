@@ -36,7 +36,8 @@ notion-mcp auth whoami --json
 先在终端确认：
 
 ```bash
-notion-mcp mcp serve --help
+notion-mcp server stdio --help
+notion-mcp server run --help
 ```
 
 client 配置应使用：
@@ -44,8 +45,15 @@ client 配置应使用：
 ```json
 {
   "command": "notion-mcp",
-  "args": ["mcp", "serve", "--transport", "stdio"]
+  "args": ["server", "stdio"]
 }
+```
+
+如果使用后台 streamable-http server，检查：
+
+```bash
+notion-mcp server status
+notion-mcp server logs --tail 100
 ```
 
 ## Notion API version 问题

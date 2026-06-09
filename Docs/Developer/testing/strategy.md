@@ -4,8 +4,8 @@
 
 ## 分层
 
-- legacy tests
-  - 保留旧 FastAPI REST 和旧 CLI 行为。
+- compatibility tests
+  - 保持公开 CLI 和 MCP Tool 行为可回归。
   - 不为了新实现修改旧测试。
 - Core tests
   - 覆盖配置、错误、client factory、auth、services、raw API、审计。
@@ -37,5 +37,5 @@ uv run pytest -q tests/live
 
 ```bash
 uv run --no-project --with . notion-mcp --help
-uv run --no-project --with . notion-mcp mcp serve --help
+uv run --no-project --with . notion-mcp server run --help
 ```

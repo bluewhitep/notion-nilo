@@ -56,7 +56,6 @@ def build_status() -> dict[str, object]:
         "config": public_config,
         "capabilities": {
             "core": True,
-            "legacy_rest": True,
             "mcp_server": not (configured and explicit_config_path),
         },
     }

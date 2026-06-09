@@ -41,8 +41,10 @@ def test_page_create_dry_run_does_not_call_core_write(monkeypatch) -> None:
     assert service.create_called is False
 
 
-def test_mcp_serve_help_is_available() -> None:
-    result = runner.invoke(app, ["mcp", "serve", "--help"])
+def test_server_run_help_is_available() -> None:
+    result = runner.invoke(app, ["server", "run", "--help"])
 
     assert result.exit_code == 0
-    assert "serve" in result.stdout
+    assert "run" in result.stdout
+    assert "--host" in result.stdout
+    assert "--port" in result.stdout

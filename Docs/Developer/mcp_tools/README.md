@@ -6,7 +6,8 @@
 
 - server factory：`src/notion_mcp/mcp_server/server.py`
 - package entry：`notion_mcp.mcp_server:create_mcp_server`
-- CLI entry：`notion-mcp mcp serve --transport stdio`
+- CLI stdio entry：`notion-mcp server stdio`
+- CLI background HTTP entry：`notion-mcp server run --host 127.0.0.1 --port 8000`
 - 支持 transport：`stdio`、`streamable-http`
 
 ## 工具域文档

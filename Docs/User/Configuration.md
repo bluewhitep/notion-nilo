@@ -244,16 +244,7 @@ notion-mcp data-source query <data_source_id> --payload '{"page_size": 10}'
 notion-mcp data-source property rename <data_source_id> Status State
 ```
 
-## Legacy 兼容入口
-
-以下命令保留给旧脚本迁移使用，不建议作为新用法：
-
-- `notion-mcp set-token`
-- `notion-mcp set-user`
-- `notion-mcp show`
-- `notion-mcp run`
-
-新配置命令优先使用：
+配置命令统一使用：
 
 ```bash
 notion-mcp config --global user.token ntn_xxx

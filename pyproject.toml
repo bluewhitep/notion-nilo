@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "notion-mcp"
 version = "0.2.0"
-description = "A local Notion MCP project with legacy FastAPI routes and a Typer CLI"
+description = "A local Notion MCP server with Core, CLI, and MCP tool entrypoints"
 authors = [ { name = "Your Name", email = "you@example.com" } ]
 readme = "README.md"
 requires-python = ">=3.10"

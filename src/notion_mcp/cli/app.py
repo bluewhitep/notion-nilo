@@ -20,12 +20,11 @@ from .commands import (
     databases,
     file_uploads,
     init,
-    legacy,
-    mcp,
     pages,
     project,
     raw_api,
     search,
+    server,
     status,
     users,
     version,
@@ -67,8 +66,7 @@ def register_commands() -> None:
     search.register(app)
     custom_emojis.register(app)
     raw_api.register(app)
-    mcp.register(app)
-    legacy.register(app)
+    server.register(app)
 
 
 register_commands()

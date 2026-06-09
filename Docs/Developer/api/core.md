@@ -1,6 +1,6 @@
 # Core API
 
-本文档面向开发者，记录 `src/notion_mcp/core/` 当前已经实现的 Core 能力。Core 是唯一业务逻辑层，CLI、MCP Tool 和 legacy REST 兼容入口都应调用 Core，而不是直接调用 Notion SDK。
+本文档面向开发者，记录 `src/notion_mcp/core/` 当前已经实现的 Core 能力。Core 是唯一业务逻辑层，CLI 和 MCP Tool 都应调用 Core，而不是直接调用 Notion SDK。
 
 ## 配置
 

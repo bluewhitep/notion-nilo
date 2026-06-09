@@ -79,11 +79,12 @@ def test_user_cli_doc_lists_all_current_cli_commands() -> None:
         "notion-mcp custom-emoji retrieve",
         "notion-mcp raw-api operations",
         "notion-mcp raw-api invoke",
-        "notion-mcp mcp serve",
-        "notion-mcp set-token",
-        "notion-mcp set-user",
-        "notion-mcp show",
-        "notion-mcp run",
+        "notion-mcp server run",
+        "notion-mcp server status",
+        "notion-mcp server stop",
+        "notion-mcp server logs",
+        "notion-mcp server remove",
+        "notion-mcp server stdio",
     ]
 
     for command in required_commands:

@@ -6,7 +6,7 @@
 
 - [Installation](Installation.md)：安装 `notion-mcp`。
 - [Configuration](Configuration.md)：准备 Notion connection、设置 token、创建项目级上下文。
-- [MCP Clients](MCP_Clients.md)：让 MCP client 启动本地 Notion MCP server。
+- [MCP Clients](MCP_Clients.md)：在 MCP 工具里配置本地 Notion MCP server。
 - [Troubleshooting](Troubleshooting.md)：常见错误和排查入口。
 
 ## CLI 分册
@@ -22,8 +22,7 @@
 - [File Uploads](Cli/File_Uploads.md)：file upload 生命周期命令。
 - [Search And Custom Emoji](Cli/Search_And_Custom_Emoji.md)：workspace 搜索和 custom emoji。
 - [Raw API](Cli/Raw_API.md)：高级兜底 Raw API 入口。
-- [MCP Server](Cli/MCP_Server.md)：启动本地 MCP server。
-- [Legacy Commands](Cli/Legacy_Commands.md)：旧脚本兼容命令。
+- [MCP Server](Cli/MCP_Server.md)：启动、停止、查看状态和日志。
 
 ## 常用起步顺序
 

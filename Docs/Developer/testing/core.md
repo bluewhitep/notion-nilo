@@ -10,7 +10,7 @@
 - Auth：验证 `users.me()` token 校验、configured user id 匹配和错误包装。
 - Services：验证 pages、blocks、databases、data sources、users、comments、views、file uploads、search、custom emojis 和 raw API service 行为。
 - Audit：验证 JSONL 审计记录和敏感字段清理。
-- Boundary：验证 Core 不依赖 CLI、MCP server 或 legacy REST routes。
+- Boundary：验证 Core 不依赖 CLI、MCP server 或内部 REST 原型 routes。
 
 ## 常用验证命令
 

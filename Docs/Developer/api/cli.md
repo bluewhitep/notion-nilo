@@ -181,17 +181,23 @@ block = page content node
 - `notion-mcp custom-emoji list/retrieve`
 - `notion-mcp raw-api operations`
 - `notion-mcp raw-api invoke <operation>`
-- `notion-mcp mcp serve`
+- `notion-mcp server run`
+- `notion-mcp server status`
+- `notion-mcp server stop`
+- `notion-mcp server logs`
+- `notion-mcp server remove`
+- `notion-mcp server stdio`
 
 Raw API 是高级兜底入口，不应作为普通 page/database 编辑路径。
 
-## Legacy 命令
+## 移除的旧入口
 
-以下 root 命令仍保留给旧脚本：
+以下旧 root 命令不再作为公开 CLI 入口：
 
 - `notion-mcp set-token`
 - `notion-mcp set-user`
 - `notion-mcp show`
 - `notion-mcp run`
+- `notion-mcp mcp serve`
 
-新增用户文档不应把隐藏兼容命令写成正式推荐路径。
+配置使用 `notion-mcp config --global ...`；MCP server 使用 `notion-mcp server ...`。

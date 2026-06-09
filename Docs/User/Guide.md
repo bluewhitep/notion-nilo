@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-当前可用入口包括 git-like CLI、本地 MCP server 和 legacy FastAPI REST 兼容入口。
+当前可用入口包括 git-like CLI 和本地 MCP server。
 
 CLI 使用说明见 [Cli](Cli.md)。
 MCP client 使用说明见 [MCP Clients](MCP_Clients.md)。
@@ -49,10 +49,17 @@ notion-mcp auth whoami --json
 
 ## 启动 MCP Server
 
-运行以下命令启动本地 MCP server：
+如果 MCP client 使用命令型 stdio server，配置为：
 
 ```bash
-notion-mcp mcp serve --transport stdio
+notion-mcp server stdio
+```
+
+如果 MCP client 支持 streamable-http URL，可以后台启动本地 server：
+
+```bash
+notion-mcp server run --host 127.0.0.1 --port 8000
+notion-mcp server status
 ```
 
 MCP client 配置说明见 [MCP Clients](MCP_Clients.md)。

@@ -14,14 +14,12 @@ def test_root_help_describes_direct_commands() -> None:
     assert "Initialize project-local .notion_mcp context" in result.stdout
     assert "status" in result.stdout
     assert "Show global configuration and capability status" in result.stdout
-    assert "set-token" in result.stdout
-    assert "Set the legacy global Notion token" in result.stdout
-    assert "set-user" in result.stdout
-    assert "Set the legacy global Notion user id" in result.stdout
-    assert "show" in result.stdout
-    assert "Show legacy global configuration" in result.stdout
-    assert "run" in result.stdout
-    assert "Run the legacy FastAPI REST server" in result.stdout
+    assert "server" in result.stdout
+    assert "Manage the local MCP server" in result.stdout
+    assert "set-token" not in result.stdout
+    assert "set-user" not in result.stdout
+    assert "Show legacy global configuration" not in result.stdout
+    assert "Run the legacy FastAPI REST server" not in result.stdout
 
 
 def test_project_and_config_help_describe_dynamic_subcommands() -> None:

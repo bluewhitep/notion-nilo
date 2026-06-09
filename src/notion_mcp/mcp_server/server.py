@@ -36,6 +36,36 @@ DESTRUCTIVE_TOOLS = {"page_trash", "block_trash"}
 class NotionFastMCP(FastMCP):
     # --------------------------------
     # Function Description:
+    # Registers tools as unstructured text-output tools unless explicitly overridden.
+    # Inputs/Outputs:
+    # Input FastMCP tool metadata; returns a decorator that registers the tool.
+    # Usage:
+    # @server.tool(name="config_status")
+    # --------------------------------
+    def tool(
+        self,
+        name: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        annotations: Any | None = None,
+        icons: list[Any] | None = None,
+        meta: dict[str, Any] | None = None,
+        structured_output: bool | None = None,
+    ):
+        if structured_output is None:
+            structured_output = False
+        return super().tool(
+            name=name,
+            title=title,
+            description=description,
+            annotations=annotations,
+            icons=icons,
+            meta=meta,
+            structured_output=structured_output,
+        )
+
+    # --------------------------------
+    # Function Description:
     # Calls tools with a pre-validation confirmation check for destructive tools.
     # Inputs/Outputs:
     # Input tool name and arguments; returns MCP content blocks.
@@ -103,10 +133,12 @@ def supported_transports() -> tuple[str, ...]:
 # Usage:
 # server = create_mcp_server()
 # --------------------------------
-def create_mcp_server() -> FastMCP:
+def create_mcp_server(*, host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
     server = NotionFastMCP(
         "notion-mcp",
         instructions="Local Notion MCP server backed by Core services.",
+        host=host,
+        port=port,
     )
     for module in [
         config,
@@ -135,8 +167,8 @@ def create_mcp_server() -> FastMCP:
 # Usage:
 # serve(transport="stdio")
 # --------------------------------
-def serve(transport: str = "stdio") -> None:
+def serve(transport: str = "stdio", *, host: str = "127.0.0.1", port: int = 8000) -> None:
     if transport not in supported_transports():
         raise ValueError(f"Unsupported MCP transport: {transport}")
     typed_transport = cast(Literal["stdio", "sse", "streamable-http"], transport)
-    create_mcp_server().run(transport=typed_transport)
+    create_mcp_server(host=host, port=port).run(transport=typed_transport)

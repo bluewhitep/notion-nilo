@@ -4,7 +4,7 @@
 
 ## 覆盖目标
 
-- Root command：验证 `init`、`pwd`、`version`、legacy compatibility commands 和帮助文本。
+- Root command：验证 `init`、`pwd`、`version`、server lifecycle commands 和帮助文本。
 - Config commands：验证 `config --global` 管理全局配置，`config --local --show` 读取项目级配置，token 默认脱敏。
 - Project context：验证项目级 `.notion_mcp/` 初始化、状态读取、root 解析和隐藏兼容入口。
 - Page commands：验证 page attach/status/refresh/detach/retrieve/blocks/create/update，以及 hidden compatibility aliases。
@@ -33,7 +33,7 @@ env PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/notion_mcp_uv_docs uv ru
 ```bash
 env PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/notion_mcp_uv_install uv run --no-project --with . notion-mcp --help
 env PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/notion_mcp_uv_install uv run --no-project --with . notion-mcp config --global --show --json
-env PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/notion_mcp_uv_install uv run --no-project --with . notion-mcp mcp serve --help
+env PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/notion_mcp_uv_install uv run --no-project --with . notion-mcp server run --help
 ```
 
 ## 备注

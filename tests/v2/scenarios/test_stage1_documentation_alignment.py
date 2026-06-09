@@ -18,15 +18,15 @@ def test_developer_and_user_doc_entrypoints_are_split() -> None:
     assert (REPO_ROOT / "Docs" / "User" / "MCP_Clients.md").is_file()
 
 
-def test_architecture_distinguishes_legacy_rest_from_target() -> None:
-    """Developer architecture docs must not present the legacy REST prototype as the final MCP server."""
+def test_architecture_documents_mcp_server_as_primary_entry() -> None:
+    """Developer architecture docs must present MCP server lifecycle as the primary server entry."""
     architecture = read_doc("Docs/Developer/architecture/overview.md")
 
     assert "Core" in architecture
     assert "CLI" in architecture
     assert "MCP Tool" in architecture
-    assert "legacy FastAPI REST" in architecture
-    assert "它不是最终 MCP 接口" in architecture
+    assert "notion-mcp server run" in architecture
+    assert "notion-mcp server stdio" in architecture
 
 
 def test_design_documents_core_cli_mcp_call_boundaries() -> None:

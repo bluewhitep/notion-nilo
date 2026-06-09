@@ -46,7 +46,6 @@ def register(server: FastMCP) -> None:
             "config": public,
             "capabilities": {
                 "core": True,
-                "legacy_rest": True,
                 "mcp_server": True,
             },
         }

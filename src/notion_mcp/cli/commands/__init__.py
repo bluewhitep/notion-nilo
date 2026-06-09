@@ -12,8 +12,7 @@ __all__ = [
     "config",
     "databases",
     "init",
-    "legacy",
-    "mcp",
     "pages",
+    "server",
     "status",
 ]

@@ -37,7 +37,7 @@ hatchling.build
 - `fastapi`
 - `uvicorn`
 
-`fastapi` 和 `uvicorn` 当前用于 legacy REST 兼容入口。
+`fastapi` 当前只用于内部 REST 原型兼容代码。`uvicorn` 仍用于 HTTP server runtime。
 
 ## Runtime Stack
 
@@ -56,7 +56,7 @@ Notion SDK 由 Core client factory 统一创建，并集中注入：
 - retry policy
 - fake client test double
 
-CLI、MCP Tool 和 legacy REST routes 不应直接创建 Notion SDK client。
+CLI 和 MCP Tool 不应直接创建 Notion SDK client。
 
 Notion API version 是全局配置项。当前默认目标版本为 `2026-03-11`，升级该版本时必须同步兼容性测试。
 
@@ -85,7 +85,7 @@ Pydantic 用于配置模型和结构化输入输出。当前代码使用 Pydanti
 ```bash
 uv run --no-project --with . notion-mcp --help
 uv run --no-project --with . notion-mcp config --global --show --json
-uv run --no-project --with . notion-mcp mcp serve --help
+uv run --no-project --with . notion-mcp server run --help
 ```
 
 ## Release Checks

@@ -3,14 +3,14 @@ notion_mcp
 ===============
 
 This package implements the local Notion MCP service, including configuration
-management, FastAPI service setup, CLI commands, and route modules.
+management, MCP server setup, CLI commands, and compatibility route modules.
 
 Module overview:
 
 - `config`: Reads and saves global configuration.
 - `models`: Contains Pydantic models for validation.
-- `routes`: Provides domain-specific FastAPI routes.
-- `server`: Builds the FastAPI application and registers routes.
+- `routes`: Provides internal REST prototype compatibility routes.
+- `mcp_server`: Builds the MCP server and registers tools.
 - `cli`: Provides the command-line entry point.
 
 """
