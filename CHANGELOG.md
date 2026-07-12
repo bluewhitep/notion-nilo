@@ -4,6 +4,8 @@ All notable changes to N.I.L.O. are documented in this file.
 
 ## Unreleased
 
+## 0.4.0 - 2026-07-12
+
 ### Added
 
 - Added a shared `runtime` layer for MCP server process state, logs, and stdio/Streamable HTTP lifecycle behavior.
@@ -18,6 +20,9 @@ All notable changes to N.I.L.O. are documented in this file.
 - Made project initialization create or incrementally update `.gitignore` with the `.notion_mcp/` entry without replacing existing content.
 - Standardized MCP transports on `stdio` for local command-launched clients and `streamable-http` for URL-based local or remote clients.
 - Updated the English, Japanese, and Chinese documentation for the new architecture, CLI, configuration, and MCP transport contracts.
+- Upgraded GitHub Actions to current Node.js 24-compatible major releases while preserving CI, Pages, and PyPI Trusted Publishing behavior.
+- Updated locked dependencies to patched releases after a clean pre-release vulnerability audit.
+- Hardened MCP secret redaction and required explicit confirmation for destructive Raw API operations.
 
 ### Removed
 

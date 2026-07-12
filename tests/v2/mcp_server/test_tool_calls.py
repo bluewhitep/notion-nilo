@@ -5,6 +5,7 @@ import pytest
 from nilo.mcp_server.server import create_mcp_server
 from nilo.mcp_server.tools import config as config_tools
 from nilo.mcp_server.tools import pages
+from nilo.core.config import CoreConfig
 from nilo.core.errors import ConfigValidationError
 
 
@@ -80,3 +81,24 @@ async def test_config_status_tool_returns_core_error_for_invalid_config(monkeypa
     assert payload["ok"] is False
     assert payload["error"]["type"] == "ConfigValidationError"
     assert payload["error"]["code"] == "config_validation_failed"
+
+
+@pytest.mark.asyncio
+# --------------------------------
+# Function Description:
+# Verifies Agent-facing MCP configuration reads cannot expose the Notion token.
+# Inputs/Outputs:
+# Input monkeypatch fixture; assertion-only async test.
+# Usage:
+# pytest tests/v2/mcp_server/test_tool_calls.py -k always_redacts
+# --------------------------------
+async def test_config_get_always_redacts_token_and_has_no_secret_override(monkeypatch) -> None:
+    monkeypatch.setattr(config_tools, "load_core_config", lambda: CoreConfig(notion_token="ntn_test_secret"))
+    server = create_mcp_server()
+    tools = {tool.name: tool for tool in await server.list_tools()}
+
+    result = await server.call_tool("config_get", {"key": "notion_token"})
+
+    assert "show_secret" not in tools["config_get"].inputSchema.get("properties", {})
+    assert text_result_to_json(result) == {"key": "notion_token", "value": "********"}
+    assert "ntn_test_secret" not in result[0].text

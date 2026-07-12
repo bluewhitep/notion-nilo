@@ -5,7 +5,7 @@
   - Required parameters: none.
   - Returns: `configured`, `config`, `capabilities`.
 - `config_get`
-  - 説明: configuration field を 1 つ読み取ります。
+  - 説明: non-secret configuration field を 1 つ読み取ります。
   - Required parameters: `key`.
-  - Optional parameters: `show_secret`, default `false`.
-  - Security: `notion_token` は default で `********` を返します。
+  - Optional parameters: none.
+  - Security: MCP は raw `notion_token` を返しません。設定済みの場合も常に `********` を返します。

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "notion-nilo"
-version = "0.3.0"
+version = "0.4.0"
 description = "N.I.L.O. - Notion Interfaces, Locally Operated: a local Notion runtime with Core, CLI, and MCP tool entrypoints"
 authors = [ { name = "Jieqiang Zhang", email = "20318684+bluewhitep@users.noreply.github.com" } ]
 readme = "README.md"

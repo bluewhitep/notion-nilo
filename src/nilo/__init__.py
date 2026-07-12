@@ -18,7 +18,7 @@ Module overview:
 from importlib import metadata
 
 try:
-    __version__ = metadata.version(__name__)
+    __version__ = metadata.version("notion-nilo")
 except metadata.PackageNotFoundError:
     # Package is not installed; fallback for local development
     __version__ = "0.0.0"

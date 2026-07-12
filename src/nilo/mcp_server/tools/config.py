@@ -54,16 +54,12 @@ def register(server: FastMCP) -> None:
 
     @server.tool(
         name="config_get",
-        description="Read one local configuration key with token redacted by default.",
+        description="Read one local configuration key. Secret values are always redacted.",
         annotations=ToolAnnotations(readOnlyHint=True),
     )
-    def config_get(key: str, show_secret: bool = False) -> dict[str, Any]:
+    def config_get(key: str) -> dict[str, Any]:
         try:
             config = load_core_config()
         except CoreError as exc:
             return core_error_payload(exc)
-        if key == "notion_token" and not show_secret:
-            value: Any = "********" if config.notion_token else None
-        else:
-            value = getattr(config, key, None)
-        return {"key": key, "value": value}
+        return {"key": key, "value": redacted_config(config).get(key)}

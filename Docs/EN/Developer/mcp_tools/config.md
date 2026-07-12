@@ -5,7 +5,7 @@
   - Required parameters: none.
   - Returns: `configured`, `config`, and `capabilities`.
 - `config_get`
-  - Description: reads one configuration field.
+  - Description: reads one non-secret configuration field.
   - Required parameters: `key`.
-  - Optional parameters: `show_secret`, default `false`.
-  - Security: `notion_token` returns `********` by default.
+  - Optional parameters: none.
+  - Security: MCP never returns the raw `notion_token`; the field always returns `********` when configured.

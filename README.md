@@ -22,7 +22,7 @@ The project is in alpha. Public APIs, CLI commands, and MCP tool contracts may s
 
 ### PyPI release
 
-Use this method after the first PyPI release is published:
+Install the current release from PyPI:
 
 ```bash
 uv tool install notion-nilo
@@ -80,8 +80,8 @@ Common English entrypoints:
 
 ## Roadmap
 
-- Publish the first `notion-nilo` PyPI release from GitHub Release `v_0.3.0`.
-- Consider a final `notion-mcp` migration notice release that points users to `notion-nilo`.
+- Stabilize the Core/Runtime, CLI, and MCP contracts toward the first stable release.
+- Expand remote deployment security guidance before recommending network exposure.
 - Keep GitHub source installation available for users who want the latest repository state before a PyPI release.
 
 ## Development
