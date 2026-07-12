@@ -1,95 +1,81 @@
-"""
-Database-related routes.
-
-Provides listing, retrieval, and query operations for data sources and legacy
-database compatibility paths.
-"""
+# File: src/nilo/routes/databases.py
+# Format: UTF-8
+# =============================
+# File Description:
+# Legacy database REST routes delegating compatibility behavior to Core.
+# TAG: rest, routes, databases, compatibility, core
+# =============================
 
 from __future__ import annotations
 
-from typing import Any, Dict, cast
+from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 
-try:
-    from notion_client import APIResponseError, Client as NotionClient  # type: ignore
-except ImportError:
-    # Define placeholders so tests can import this module without notion-client.
-    APIResponseError = Exception  # type: ignore
-    NotionClient = Any  # type: ignore
+from nilo.core.errors import CoreError
+from nilo.core.services.database_compatibility import DatabaseCompatibilityService
 
-from ..dependencies import get_notion_client
+from ..dependencies import get_database_compatibility_service, raise_core_http_error
 
 
 router = APIRouter(prefix="/databases", tags=["databases"])
 
 
 @router.get("/")
+# --------------------------------
+# Function Description:
+# Lists database or data-source objects through the Core compatibility service.
+# Inputs/Outputs:
+# Input object kind and injected service; returns Notion search response.
+# Usage:
+# GET /databases?kind=data_source
+# --------------------------------
 async def list_databases(
     kind: str = "data_source",
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """List databases or data sources.
-
-    Args:
-        kind: Query type, either ``data_source`` or ``database``. Defaults to data sources.
-        client: Injected Notion client.
-
-    Returns:
-        Search results returned by Notion.
-
-    Raises:
-        HTTPException: Raised when accessing the Notion API fails.
-    """
+    service: DatabaseCompatibilityService = Depends(get_database_compatibility_service),
+) -> dict[str, Any]:
     if kind not in {"data_source", "database"}:
         raise HTTPException(status_code=400, detail="kind must be data_source or database")
     try:
-        # Filter search results by object type.
-        search_filter = {"value": kind, "property": "object"}
-        result = client.search(filter=search_filter)
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.list(kind)
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.get("/{data_source_id}")
+# --------------------------------
+# Function Description:
+# Retrieves an ambiguous database/data-source id through Core fallback orchestration.
+# Inputs/Outputs:
+# Input resource id and injected service; returns Notion retrieve response.
+# Usage:
+# GET /databases/{resource_id}
+# --------------------------------
 async def retrieve_database(
     data_source_id: str,
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Retrieve metadata for a data source or legacy database.
-
-    Prefers ``data_sources.retrieve`` and falls back to legacy ``databases.retrieve``.
-    """
+    service: DatabaseCompatibilityService = Depends(get_database_compatibility_service),
+) -> dict[str, Any]:
     try:
-        result = client.data_sources.retrieve(data_source_id=data_source_id)  # type: ignore[attr-defined]
-        return cast(Dict[str, Any], result)
-    except Exception:
-        # Fall back to the legacy database endpoint when data source retrieval fails.
-        try:
-            result = client.databases.retrieve(database_id=data_source_id)  # type: ignore[attr-defined]
-            return cast(Dict[str, Any], result)
-        except APIResponseError as err:
-            raise HTTPException(status_code=err.status, detail=str(err))
+        return service.retrieve(data_source_id)
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.post("/{data_source_id}/query")
+# --------------------------------
+# Function Description:
+# Queries an ambiguous database/data-source id through Core fallback orchestration.
+# Inputs/Outputs:
+# Input resource id, JSON payload, and injected service; returns query response.
+# Usage:
+# POST /databases/{resource_id}/query
+# --------------------------------
 async def query_database(
     data_source_id: str,
-    payload: Dict[str, Any] = Body(default_factory=dict),
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Query a data source or legacy database.
-
-    The ``payload`` body is passed directly to the Notion query endpoint.
-    """
+    payload: dict[str, Any] = Body(default_factory=dict),
+    service: DatabaseCompatibilityService = Depends(get_database_compatibility_service),
+) -> dict[str, Any]:
     try:
-        # Query by data source first.
-        result = client.data_sources.query(data_source_id=data_source_id, **payload)  # type: ignore[attr-defined]
-        return cast(Dict[str, Any], result)
-    except Exception:
-        try:
-            result = client.databases.query(database_id=data_source_id, **payload)  # type: ignore[attr-defined]
-            return cast(Dict[str, Any], result)
-        except APIResponseError as err:
-            raise HTTPException(status_code=err.status, detail=str(err))
+        return service.query(data_source_id, payload)
+    except CoreError as exc:
+        raise_core_http_error(exc)

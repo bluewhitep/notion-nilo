@@ -2,6 +2,12 @@
 
 このページでは local MCP server lifecycle commands を説明します。
 
+## Transport contract
+
+サポートするのは `stdio` と `streamable-http` だけです。local command-launched MCP client は stdio、URL で接続する local/remote MCP client は Streamable HTTP を使います。legacy SSE はサポートしません。
+
+この release が対象とするのは localhost server operation だけです。remote deployment、authentication、TLS、reverse proxy configuration は今回延期しているため、unauthenticated example endpoint を network に公開しないでください。
+
 ## Background HTTP Server
 
 | Command | Purpose |
@@ -48,6 +54,16 @@ nilo server stdio
 ```
 
 この command は foreground で動き、MCP client が閉じるかユーザーが interrupt するまで実行されます。
+
+## Short aliases
+
+Server commands には `server/srv`、`run/start`、`stdio/pipe`、`status/stat`、`stop/halt`、`logs/tail`、`remove/rm` という明示的な short aliases があります。
+
+```bash
+nilo srv start --host 127.0.0.1 --port 8000
+nilo srv stat
+nilo srv pipe
+```
 
 ## Serve Alias
 

@@ -15,7 +15,7 @@ from typing import Any
 import typer
 
 from nilo.cli.formatting import echo_json
-from nilo.mcp_server.process_manager import (
+from nilo.runtime.server_process import (
     DEFAULT_HOST,
     DEFAULT_PORT,
     DEFAULT_TRANSPORT,
@@ -23,10 +23,12 @@ from nilo.mcp_server.process_manager import (
     get_server_status,
     read_server_logs,
     remove_server_state,
+    run_foreground_stdio_server,
     start_background_server,
     stop_background_server,
 )
-from nilo.mcp_server.server import serve as serve_foreground
+
+from ..aliases import add_group_alias, command_alias
 
 app = typer.Typer(add_completion=False, help="Manage the local MCP server")
 
@@ -41,6 +43,7 @@ app = typer.Typer(add_completion=False, help="Manage the local MCP server")
 # --------------------------------
 def register(root_app: typer.Typer) -> None:
     root_app.add_typer(app, name="server")
+    add_group_alias(root_app, app, "server")
     root_app.add_typer(app, name="serve", hidden=True)
 
 
@@ -81,6 +84,7 @@ def server_response(payload: dict[str, Any]) -> dict[str, Any]:
 # nilo server run --host 127.0.0.1 --port 8000
 # --------------------------------
 @app.command(name="run")
+@command_alias(app, "server", "run")
 def run_command(
     host: str = typer.Option(DEFAULT_HOST, "--host", help="Bind address"),
     port: int = typer.Option(DEFAULT_PORT, "--port", help="Bind port"),
@@ -118,8 +122,9 @@ def run_command(
 # nilo server stdio
 # --------------------------------
 @app.command(name="stdio")
+@command_alias(app, "server", "stdio")
 def stdio_command() -> None:
-    serve_foreground(transport="stdio")
+    run_foreground_stdio_server()
 
 
 # --------------------------------
@@ -131,6 +136,7 @@ def stdio_command() -> None:
 # nilo server status --json
 # --------------------------------
 @app.command(name="status")
+@command_alias(app, "server", "status")
 def status_command(
     json_output: bool = typer.Option(False, "--json", help="Print JSON output"),
 ) -> None:
@@ -162,6 +168,7 @@ def status_command(
 # nilo server stop --timeout 10
 # --------------------------------
 @app.command(name="stop")
+@command_alias(app, "server", "stop")
 def stop_command(
     timeout: float = typer.Option(10, "--timeout", help="Seconds to wait for graceful stop"),
     force: bool = typer.Option(False, "--force", help="Kill the process if it does not stop gracefully"),
@@ -191,6 +198,7 @@ def stop_command(
 # nilo server remove
 # --------------------------------
 @app.command(name="remove")
+@command_alias(app, "server", "remove")
 def remove_command(
     keep_log: bool = typer.Option(False, "--keep-log", help="Keep the log file"),
     force: bool = typer.Option(False, "--force", help="Force stop before removing state"),
@@ -217,6 +225,7 @@ def remove_command(
 # nilo server logs --tail 100
 # --------------------------------
 @app.command(name="logs")
+@command_alias(app, "server", "logs")
 def logs_command(
     tail: int = typer.Option(50, "--tail", help="Number of trailing lines to print; use 0 for all"),
     follow: bool = typer.Option(False, "--follow", help="Continue printing new log lines"),

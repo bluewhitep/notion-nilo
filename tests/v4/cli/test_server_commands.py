@@ -1,13 +1,30 @@
 import json
+from pathlib import Path
 
 from typer.testing import CliRunner
 
 from nilo.cli import app
 from nilo.cli.commands import server as server_commands
-from nilo.mcp_server.process_manager import ServerRuntimeState
+from nilo.runtime.server_process import ServerRuntimeState
 
 
 runner = CliRunner()
+
+
+def test_server_stdio_uses_runtime_without_cli_to_mcp_import(monkeypatch) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(
+        server_commands,
+        "run_foreground_stdio_server",
+        lambda: calls.append("stdio"),
+    )
+
+    result = runner.invoke(app, ["server", "stdio"])
+
+    assert result.exit_code == 0
+    assert calls == ["stdio"]
+    source = Path(server_commands.__file__).read_text(encoding="utf-8")
+    assert "nilo.mcp_server" not in source
 
 
 def test_server_run_passes_host_port_and_prints_json(monkeypatch) -> None:

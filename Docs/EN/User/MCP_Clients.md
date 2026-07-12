@@ -16,14 +16,14 @@ The MCP client only needs to connect to a local `nilo` server.
 
 ## Choose a Transport
 
-Most clients use one of these transports:
+N.I.L.O. supports exactly these two transports:
 
 | Transport | Best for | Start server manually first |
 | --- | --- | --- |
-| stdio | Clients that can launch a command with arguments | No |
-| streamable-http | Clients that connect to a local MCP URL | Yes, run `nilo server run` |
+| stdio | Local clients that launch a command with arguments | No |
+| streamable-http | Local or remote clients that connect to an MCP service URL | Yes, the service must be running |
 
-Use stdio when the client supports command and args fields. Use streamable HTTP when the client requires a URL.
+Use stdio for a local command-launched client. Use Streamable HTTP when N.I.L.O. runs as a service and the client connects by URL, whether that client is local or remote. Legacy SSE is not supported and `sse` is rejected as a transport value.
 
 ## Stdio Configuration
 
@@ -128,7 +128,7 @@ Use these client values:
 | Server name | `nilo` |
 | Transport | `streamable-http` |
 | URL | `http://127.0.0.1:8000/mcp` |
-| Authentication | None |
+| Authentication | None (localhost example only) |
 
 Common JSON shape:
 
@@ -150,6 +150,10 @@ http://127.0.0.1:8000/mcp
 ```
 
 Do not put the Notion token into the MCP client. The local `nilo` server reads it from local configuration.
+
+## Remote Service Scope
+
+The transport contract for a remotely deployed N.I.L.O. service is Streamable HTTP at its `/mcp` endpoint; a remote client must not select legacy SSE. This release documents and validates only the localhost server shown above. Remote deployment, authentication, TLS, and reverse-proxy configuration are deferred, so do not expose this unauthenticated localhost example to a network.
 
 ## Background Server Management
 
@@ -301,5 +305,6 @@ If the client does not show N.I.L.O. MCP tools:
 - The token is stored in a local configuration file.
 - Normal status output masks the token.
 - MCP client configuration does not need the Notion token.
+- The `Authentication: None` example applies only to `127.0.0.1`; remote deployment security is not defined in this release.
 - Destructive tools such as `page_trash` and `block_trash` require `confirm=true`.
 - Real Notion calls require the connection to be shared with the relevant page, database, or workspace content.

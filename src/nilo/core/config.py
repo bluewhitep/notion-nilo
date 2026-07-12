@@ -2,8 +2,8 @@
 # Format: UTF-8
 # =============================
 # File Description:
-# Strict local configuration model and file operations for the Core layer.
-# TAG: core, config
+# Global and effective project-aware configuration contracts for the Core layer.
+# TAG: core, config, project
 # =============================
 
 from __future__ import annotations
@@ -16,12 +16,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
+from .config_constants import DEFAULT_TRANSPORT, SUPPORTED_TRANSPORTS
 from .errors import ConfigNotFoundError, ConfigValidationError
+from .project import ConfigLocations, ProjectConfigStore, ProjectResolver
+from .project.project_paths import global_config_file
 
 DEFAULT_CONFIG_DIR = Path.home() / ".notion_mcp"
 DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.json"
 DEFAULT_NOTION_VERSION = "2026-03-11"
-DEFAULT_TRANSPORT = "stdio"
 
 
 class CoreConfig(BaseModel):
@@ -90,6 +92,25 @@ class CoreConfig(BaseModel):
             raise ValueError("notion_version cannot be empty")
         return stripped
 
+    # --------------------------------
+    # Function Description:
+    # Validates the configured local transport against the Core whitelist.
+    # Inputs/Outputs:
+    # Input transport string; returns normalized stdio or streamable-http.
+    # Usage:
+    # CoreConfig(default_transport="stdio")
+    # --------------------------------
+    @field_validator("default_transport")
+    @classmethod
+    def validate_default_transport(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized not in SUPPORTED_TRANSPORTS:
+            raise ValueError(
+                "default_transport must be one of: "
+                f"{', '.join(sorted(SUPPORTED_TRANSPORTS))}"
+            )
+        return normalized
+
 
 # --------------------------------
 # Function Description:
@@ -100,21 +121,34 @@ class CoreConfig(BaseModel):
 # config_path_from_env()
 # --------------------------------
 def config_path_from_env() -> Path:
-    env_path = os.getenv("NOTION_MCP_CONFIG")
-    if env_path:
-        return Path(env_path).expanduser()
-    return DEFAULT_CONFIG_FILE
+    return global_config_file()
 
 
 # --------------------------------
 # Function Description:
-# Loads Core configuration from disk.
+# Resolves existing project and global configuration directories for a start path.
+# Inputs/Outputs:
+# Input optional cwd/home paths; returns ConfigLocations with explicit Path or None values.
+# Usage:
+# resolve_config_locations(Path.cwd())
+# --------------------------------
+def resolve_config_locations(
+    cwd: Path | None = None,
+    *,
+    home: Path | None = None,
+) -> ConfigLocations:
+    return ProjectResolver.resolve_config_locations(cwd, home=home)
+
+
+# --------------------------------
+# Function Description:
+# Loads global Core configuration from disk without project-level overrides.
 # Inputs/Outputs:
 # Optional path input; returns CoreConfig or raises CoreError.
 # Usage:
-# load_core_config(path=Path("config.json"))
+# load_global_core_config(path=Path("config.json"))
 # --------------------------------
-def load_core_config(path: Path | None = None) -> CoreConfig:
+def load_global_core_config(path: Path | None = None) -> CoreConfig:
     cfg_path = path or config_path_from_env()
     if not cfg_path.exists():
         raise ConfigNotFoundError(str(cfg_path))
@@ -131,6 +165,34 @@ def load_core_config(path: Path | None = None) -> CoreConfig:
             details={"path": str(cfg_path)},
         )
     return CoreConfig(**data)
+
+
+# --------------------------------
+# Function Description:
+# Loads global Core config and applies credential-free project setting overrides.
+# Inputs/Outputs:
+# Optional explicit path/cwd/home; returns effective CoreConfig or raises CoreError.
+# Usage:
+# load_core_config(cwd=Path.cwd())
+# --------------------------------
+def load_core_config(
+    path: Path | None = None,
+    *,
+    cwd: Path | None = None,
+    home: Path | None = None,
+) -> CoreConfig:
+    global_path = path if path is not None else global_config_file(home)
+    config = load_global_core_config(path=global_path)
+    if path is not None:
+        return config
+    locations = resolve_config_locations(cwd, home=home)
+    if locations.project_dir is None:
+        return config
+    project_config = ProjectConfigStore.load(locations.project_dir.parent)
+    overrides = project_config.settings.core_overrides()
+    if not overrides:
+        return config
+    return CoreConfig(**{**config.model_dump(), **overrides})
 
 
 # --------------------------------
@@ -205,7 +267,7 @@ def update_core_config(
     audit_enabled: bool | None = None,
 ) -> CoreConfig:
     try:
-        config = load_core_config(path=path)
+        config = load_global_core_config(path=path)
     except ConfigNotFoundError:
         config = CoreConfig()
     updates = {

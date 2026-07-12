@@ -11,6 +11,24 @@ from __future__ import annotations
 from typing import Any
 
 
+# --------------------------------
+# Function Description:
+# Converts arbitrary error details into values supported by standard JSON encoders.
+# Inputs/Outputs:
+# Input nested detail value; returns scalar/list/dictionary data with unknown objects stringified.
+# Usage:
+# _json_safe({"error": ValueError("bad")})
+# --------------------------------
+def _json_safe(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, dict):
+        return {str(key): _json_safe(nested) for key, nested in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_json_safe(nested) for nested in value]
+    return str(value)
+
+
 class CoreError(Exception):
     default_code = "core_error"
 
@@ -47,7 +65,7 @@ class CoreError(Exception):
             "type": self.__class__.__name__,
             "code": self.code,
             "message": self.message,
-            "details": self.details,
+            "details": _json_safe(self.details),
         }
 
 

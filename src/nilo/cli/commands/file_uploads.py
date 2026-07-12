@@ -13,6 +13,7 @@ import typer
 from nilo.core.errors import CoreError
 from nilo.core.models import dry_run_result
 
+from ..aliases import add_group_alias, command_alias
 from ..core_services import get_file_uploads_service as _get_file_uploads_service
 from ..formatting import echo_json, exit_with_error, parse_json_object
 
@@ -21,14 +22,16 @@ app = typer.Typer(add_completion=False, help="File upload operations")
 
 def register(root_app: typer.Typer) -> None:
     root_app.add_typer(app, name="file-upload")
-    root_app.add_typer(app, name="file-uploads")
-    root_app.add_typer(app, name="files")
+    add_group_alias(root_app, app, "file-upload")
+    root_app.add_typer(app, name="file-uploads", hidden=True)
+    root_app.add_typer(app, name="files", hidden=True)
 
 
 def get_file_uploads_service():
     return _get_file_uploads_service()
 
 
+@command_alias(app, "file-upload", "retrieve")
 @app.command(name="retrieve")
 def retrieve(file_upload_id: str, json_output: bool = typer.Option(False, "--json")) -> None:
     try:
@@ -38,6 +41,7 @@ def retrieve(file_upload_id: str, json_output: bool = typer.Option(False, "--jso
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "file-upload", "list")
 @app.command(name="list")
 def list_uploads(
     payload: str = typer.Option("{}", "--payload"),
@@ -51,6 +55,7 @@ def list_uploads(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "file-upload", "create")
 @app.command(name="create")
 def create(
     payload: str = typer.Option(..., "--payload"),
@@ -68,6 +73,7 @@ def create(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "file-upload", "send")
 @app.command(name="send")
 def send(
     file_upload_id: str,
@@ -86,6 +92,7 @@ def send(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "file-upload", "complete")
 @app.command(name="complete")
 def complete(
     file_upload_id: str,

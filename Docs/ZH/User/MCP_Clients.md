@@ -16,14 +16,14 @@ MCP 工具只需要连接本地 `nilo` server。
 
 ## 选择连接方式
 
-常用连接方式有两种：
+N.I.L.O. 只支持以下两种 transport：
 
 | 方式 | 适合场景 | 是否需要先手动启动 server |
 | --- | --- | --- |
-| stdio | 工具通过 command/args 自动拉起 MCP server | 不需要 |
-| streamable-http | 工具连接一个本地 HTTP MCP URL | 需要先运行 `nilo server run` |
+| stdio | 本地工具通过 command/args 自动拉起 MCP server | 不需要 |
+| streamable-http | 本地或远程 client 连接 MCP 服务 URL | 需要先启动对应服务 |
 
-优先使用工具支持的方式。如果工具支持 command/args，stdio 通常最简单。如果工具只支持 URL，使用 streamable-http。
+本地命令型 client 使用 stdio。N.I.L.O. 作为服务运行、client 通过 URL 连接时使用 Streamable HTTP；client 可以在本地，也可以在远程。不支持 legacy SSE，transport 值 `sse` 会被拒绝。
 
 ## Stdio 配置
 
@@ -128,7 +128,7 @@ nilo server status
 | Server name | `nilo` |
 | Transport | `streamable-http` |
 | URL | `http://127.0.0.1:8000/mcp` |
-| Authentication | None |
+| Authentication | None（只适用于 localhost 示例） |
 
 如果工具使用 JSON 配置，常见格式是：
 
@@ -150,6 +150,10 @@ http://127.0.0.1:8000/mcp
 ```
 
 不要在工具里填写 Notion token。token 已由本地 `nilo` 配置读取。
+
+## 远程服务范围
+
+以后如果把 N.I.L.O. 部署为远程服务，transport 契约仍是 `/mcp` endpoint 上的 Streamable HTTP；远程 client 不得选择 legacy SSE。本版本只文档化并验证上面的 localhost server。远程部署、认证、TLS 和反向代理配置本轮延期，不要把这个无认证的 localhost 示例直接暴露到网络。
 
 ## 后台 Server 管理
 
@@ -300,5 +304,6 @@ stdio JSON 示例：
 
 - token 保存在本地配置文件中，普通状态输出会脱敏。
 - MCP 工具配置里不需要写 Notion token。
+- `Authentication: None` 只适用于 `127.0.0.1`；本版本尚未定义远程部署安全方案。
 - `page_trash`、`block_trash` 等危险工具需要 `confirm=true`。
 - 真实 Notion 调用需要 connection 已被授权访问对应 page、database 或 workspace 内容。

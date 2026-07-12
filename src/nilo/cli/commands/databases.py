@@ -23,6 +23,7 @@ from nilo.core.identifiers import parse_notion_page_id
 from nilo.core.models import dry_run_result
 from nilo.core.project import ProjectPaths, ProjectResolver
 
+from ..aliases import add_group_alias, command_alias
 from ..core_services import get_data_sources_service as _get_data_sources_service
 from ..core_services import get_databases_service as _get_databases_service
 from ..core_services import get_pages_service as _get_pages_service
@@ -44,9 +45,12 @@ property_app = typer.Typer(add_completion=False, help="Database property shortcu
 # --------------------------------
 def register(root_app: typer.Typer) -> None:
     app.add_typer(page_app, name="page")
+    add_group_alias(app, page_app, "database", "page")
     app.add_typer(property_app, name="property")
+    add_group_alias(app, property_app, "database", "property")
     root_app.add_typer(app, name="database")
-    root_app.add_typer(app, name="databases")
+    add_group_alias(root_app, app, "database")
+    root_app.add_typer(app, name="databases", hidden=True)
 
 
 # --------------------------------
@@ -231,6 +235,7 @@ def with_page_parent(payload: dict[str, object], parent_page_id: str | None = No
     return data
 
 
+@command_alias(app, "database", "attach")
 @app.command(name="attach")
 # --------------------------------
 # Function Description:
@@ -284,6 +289,7 @@ def attach_database(
         typer.echo(f"  {ProjectPaths(project_root).database_attachment_file}")
 
 
+@command_alias(app, "database", "status")
 @app.command(name="status")
 @app.command(name="current", hidden=True)
 # --------------------------------
@@ -312,6 +318,7 @@ def database_status(
         print_database_attachment_status(project_root, attachment)
 
 
+@command_alias(app, "database", "refresh")
 @app.command(name="refresh")
 # --------------------------------
 # Function Description:
@@ -337,6 +344,7 @@ def database_refresh(
         print_database_attachment_status(project_root, updated)
 
 
+@command_alias(app, "database", "detach")
 @app.command(name="detach")
 @app.command(name="deattach", hidden=True)
 # --------------------------------
@@ -371,6 +379,7 @@ def database_detach(
         typer.echo(f"  {state_file}")
 
 
+@command_alias(app, "database", "retrieve")
 @app.command(name="retrieve")
 # --------------------------------
 # Function Description:
@@ -395,6 +404,7 @@ def retrieve(
         typer.echo(result)
 
 
+@command_alias(app, "database", "sources")
 @app.command(name="sources")
 # --------------------------------
 # Function Description:
@@ -420,6 +430,7 @@ def sources(
         typer.echo(result)
 
 
+@command_alias(app, "database", "create")
 @app.command(name="create")
 # --------------------------------
 # Function Description:
@@ -449,6 +460,7 @@ def create(
         typer.echo(result)
 
 
+@command_alias(app, "database", "update")
 @app.command(name="update")
 # --------------------------------
 # Function Description:
@@ -478,6 +490,7 @@ def update(
         typer.echo(result)
 
 
+@command_alias(app, "database", "rename")
 @app.command(name="rename")
 # --------------------------------
 # Function Description:
@@ -506,6 +519,7 @@ def rename(
         typer.echo(result)
 
 
+@command_alias(app, "database", "query", context_settings={"allow_extra_args": True})
 @app.command(name="query", context_settings={"allow_extra_args": True})
 # --------------------------------
 # Function Description:
@@ -568,6 +582,7 @@ def query(
         typer.echo(result)
 
 
+@command_alias(page_app, "database", "page", "create", context_settings={"allow_extra_args": True})
 @page_app.command(name="create", context_settings={"allow_extra_args": True})
 def page_create(
     ctx: typer.Context,
@@ -619,6 +634,7 @@ def page_update(
         typer.echo(result)
 
 
+@command_alias(property_app, "database", "property", "rename")
 @property_app.command(name="rename")
 def property_rename(
     property_id_or_name: str,

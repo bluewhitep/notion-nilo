@@ -12,11 +12,11 @@ This document records the current public `nilo` CLI surface, hidden compatibilit
 ## Core Boundary
 
 ```text
-CLI -> Core -> Notion SDK/API
-MCP Tool -> Core -> Notion SDK/API
+CLI -> Core or Runtime
+MCP -> Core or Runtime
 ```
 
-The CLI must not call the Notion SDK directly. When adding a command, first confirm the corresponding Core service exists. If Core is missing the capability, add Core support before wiring the CLI.
+The CLI must not call the Notion SDK or import the MCP adapter. Shared business behavior belongs in Core and shared process/execution behavior belongs in Runtime. Core and Runtime must not import CLI or MCP. When adding a command, first confirm the corresponding shared capability exists; adapter modules may define only CLI-specific parsing, presentation, and interaction.
 
 ## Public Root Commands
 
@@ -37,6 +37,32 @@ The CLI must not call the Notion SDK directly. When adding a command, first conf
   - Prints the current project-local configuration summary.
 
 `project`, `local`, root `status`, `config global/local`, and `config set/get/unset/list` remain hidden compatibility entries. They are not part of the public command surface.
+
+The CLI follows Git/gh-style scope: global commands work from any directory, while project commands resolve the nearest `.notion_mcp/` context by walking upward to the user home.
+
+## Short Alias Contract
+
+Every public canonical command path has an explicit alphabetic alias of at most six characters. Canonical names remain the documented interface; aliases execute the same callback and are hidden from normal help to keep help concise.
+
+Root examples:
+
+| Canonical | Alias |
+| --- | --- |
+| `init` | `ini` |
+| `version` | `ver` |
+| `config` | `cfg` |
+| `pwd` | `cwd` |
+| `page` | `pg` |
+| `block` | `blk` |
+| `database` | `db` |
+| `data-source` | `ds` |
+| `server` | `srv` |
+
+Leaf examples include `retrieve -> get`, `create -> new`, `update -> upd`, `trash -> del`, and `server run -> server start`. The complete validated mapping is defined in `src/nilo/cli/aliases.py`.
+
+## Function Calling Error Contract
+
+When `--json` appears anywhere in an invocation, Click/Typer usage errors are emitted as exactly one compact JSON line. The stable envelope contains `ok=false` and an `error` object with `type`, `code`, `message`, and `details.exit_code`. Stable usage codes include `cli_missing_parameter`, `cli_invalid_parameter`, `cli_unknown_option`, and `cli_usage_error`. Human invocations without `--json` retain normal help and error rendering.
 
 ## Project Context
 
@@ -69,6 +95,8 @@ Attachment state:
 ```
 
 Project-local configuration and attachment state must not store tokens.
+
+Project configuration may override only non-sensitive Core settings. Global credentials always remain global. Project initialization rejects the user home as a project root and incrementally adds `.notion_mcp/` to the root `.gitignore`.
 
 ## Page CLI
 

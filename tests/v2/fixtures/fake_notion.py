@@ -34,3 +34,11 @@ class FakeNotionClient:
         self.calls: list[tuple[str, dict[str, object]]] = []
         self.users = FakeUsers(self)
         self.pages = FakePages(self)
+
+    def search(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(("search", kwargs))
+        return {
+            "object": "list",
+            "results": [{"id": "page-1", "object": "page"}],
+            **kwargs,
+        }

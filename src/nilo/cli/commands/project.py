@@ -16,6 +16,7 @@ import typer
 from nilo.core.errors import CoreError
 from nilo.core.project import ProjectConfig, ProjectConfigStore, ProjectPaths, ProjectResolver
 
+from ..aliases import command_alias
 from ..formatting import echo_json, exit_with_error
 
 app = typer.Typer(add_completion=False, help="Manage project-local Notion context")
@@ -35,6 +36,7 @@ def register(root_app: typer.Typer) -> None:
         name="pwd",
         help="Print resolved Notion project root",
     )(root_command)
+    command_alias(root_app, "pwd")(root_command)
     app.command(
         name="init",
         help="Create .notion_mcp project context",

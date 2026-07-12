@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import typer
 
+from ..aliases import command_alias
 from . import project
 
 
@@ -26,3 +27,4 @@ def register(app: typer.Typer) -> None:
         name="init",
         help="Initialize project-local .notion_mcp context",
     )(project.init_command)
+    command_alias(app, "init")(project.init_command)

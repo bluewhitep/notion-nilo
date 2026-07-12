@@ -13,6 +13,8 @@ from typing import Any, Literal, cast
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent
+from nilo.core.config_constants import DEFAULT_TRANSPORT, SUPPORTED_TRANSPORTS
+from nilo.runtime.server_process import DEFAULT_HOST, DEFAULT_PORT
 
 from .tools import (
     auth,
@@ -122,7 +124,7 @@ class NotionFastMCP(FastMCP):
 # supported_transports()
 # --------------------------------
 def supported_transports() -> tuple[str, ...]:
-    return ("stdio", "streamable-http")
+    return SUPPORTED_TRANSPORTS
 
 
 # --------------------------------
@@ -133,7 +135,7 @@ def supported_transports() -> tuple[str, ...]:
 # Usage:
 # server = create_mcp_server()
 # --------------------------------
-def create_mcp_server(*, host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
+def create_mcp_server(*, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> FastMCP:
     server = NotionFastMCP(
         "nilo",
         instructions="Local Notion MCP server backed by Core services.",
@@ -167,8 +169,8 @@ def create_mcp_server(*, host: str = "127.0.0.1", port: int = 8000) -> FastMCP:
 # Usage:
 # serve(transport="stdio")
 # --------------------------------
-def serve(transport: str = "stdio", *, host: str = "127.0.0.1", port: int = 8000) -> None:
+def serve(transport: str = DEFAULT_TRANSPORT, *, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     if transport not in supported_transports():
         raise ValueError(f"Unsupported MCP transport: {transport}")
-    typed_transport = cast(Literal["stdio", "sse", "streamable-http"], transport)
+    typed_transport = cast(Literal["stdio", "streamable-http"], transport)
     create_mcp_server(host=host, port=port).run(transport=typed_transport)

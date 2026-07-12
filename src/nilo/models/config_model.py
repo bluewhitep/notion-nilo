@@ -1,21 +1,13 @@
-"""
-Pydantic model definitions.
+# File: src/nilo/models/config_model.py
+# Format: UTF-8
+# =============================
+# File Description:
+# Legacy Config symbol re-exporting the canonical Core configuration model.
+# TAG: compatibility, models, config, core
+# =============================
 
-Defines the global configuration model used to store the Notion integration
-token and current user ID.
-"""
+from nilo.core.config import CoreConfig
 
-from __future__ import annotations
+Config = CoreConfig
 
-from pydantic import BaseModel, Field
-from typing import Optional
-
-
-class Config(BaseModel):
-    """Global configuration model.
-
-    Stores the Notion integration token and user UUID using snake_case JSON fields.
-    """
-
-    notion_token: Optional[str] = Field(default=None, description="Notion integration access token")
-    user_id: Optional[str] = Field(default=None, description="Current Notion user UUID")
+__all__ = ["Config"]

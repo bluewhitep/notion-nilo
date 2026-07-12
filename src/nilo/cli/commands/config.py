@@ -12,9 +12,15 @@ from typing import Any
 
 import typer
 
-from nilo.core.config import CoreConfig, load_core_config, redacted_config, save_core_config
+from nilo.core.config import (
+    CoreConfig,
+    load_global_core_config,
+    redacted_config,
+    save_core_config,
+)
 from nilo.core.errors import ConfigNotFoundError, ConfigValidationError
 
+from ..aliases import add_group_alias
 from ..formatting import echo_json, exit_with_error
 from . import project as project_commands
 
@@ -87,6 +93,7 @@ def register(root_app: typer.Typer) -> None:
     app.add_typer(global_app, name="global", hidden=True)
     app.add_typer(local_app, name="local", hidden=True)
     root_app.add_typer(app, name="config")
+    add_group_alias(root_app, app, "config")
 
 
 @app.callback(invoke_without_command=True)
@@ -158,7 +165,7 @@ def public_global_key_to_field(key: str) -> str:
 # --------------------------------
 def build_global_config_status() -> dict[str, object]:
     try:
-        config = load_core_config()
+        config = load_global_core_config()
         configured = True
     except ConfigNotFoundError:
         config = CoreConfig()
@@ -211,7 +218,7 @@ def set_public_global_value(key: str, value: str, json_output: bool = False) -> 
     try:
         field = public_global_key_to_field(key)
         try:
-            config = load_core_config()
+            config = load_global_core_config()
         except ConfigNotFoundError:
             config = CoreConfig()
         current = config.model_dump()
@@ -325,7 +332,7 @@ def set_value(
 ) -> None:
     require_known_key(key)
     try:
-        config = load_core_config()
+        config = load_global_core_config()
     except ConfigNotFoundError:
         config = CoreConfig()
     current = config.model_dump()
@@ -357,7 +364,7 @@ def get_value(
 ) -> None:
     require_known_key(key)
     try:
-        config = load_core_config()
+        config = load_global_core_config()
     except ConfigNotFoundError as exc:
         exit_with_error(exc, json_output=json_output)
     if key == "notion_token" and not show_secret:
@@ -387,7 +394,7 @@ def unset_value(
     if key in {"notion_version", "timeout_ms", "retry", "default_transport", "audit_enabled"}:
         raise typer.BadParameter(f"{key} cannot be unset")
     try:
-        config = load_core_config()
+        config = load_global_core_config()
     except ConfigNotFoundError as exc:
         exit_with_error(exc, json_output=json_output)
     current = config.model_dump()
@@ -411,7 +418,7 @@ def unset_value(
 # --------------------------------
 def list_values(json_output: bool = typer.Option(False, "--json", help="Print JSON output")) -> None:
     try:
-        config = load_core_config()
+        config = load_global_core_config()
     except ConfigNotFoundError as exc:
         exit_with_error(exc, json_output=json_output)
     public = redacted_config(config)

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import typer
 
+from .errors import JsonErrorGroup
+
 from .commands import (
     auth,
     blocks,
@@ -35,6 +37,7 @@ HELP_CONTEXT_SETTINGS = {"help_option_names": ["--help", "-h"]}
 
 app = typer.Typer(
     add_completion=False,
+    cls=JsonErrorGroup,
     context_settings=HELP_CONTEXT_SETTINGS,
     help=(
         "Local Notion MCP CLI. Show global configuration and capability "

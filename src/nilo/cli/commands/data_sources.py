@@ -17,6 +17,7 @@ from nilo.core.errors import CoreError
 from nilo.core.models import dry_run_result
 from nilo.core.project import ProjectResolver
 
+from ..aliases import add_group_alias, command_alias
 from ..core_services import get_data_sources_service as _get_data_sources_service
 from ..core_services import get_pages_service as _get_pages_service
 from ..formatting import echo_json, exit_with_error, parse_json_object
@@ -28,9 +29,12 @@ page_app = typer.Typer(add_completion=False, help="Data source page operations")
 
 def register(root_app: typer.Typer) -> None:
     app.add_typer(property_app, name="property")
+    add_group_alias(app, property_app, "data-source", "property")
     app.add_typer(page_app, name="page")
+    add_group_alias(app, page_app, "data-source", "page")
     root_app.add_typer(app, name="data-source")
-    root_app.add_typer(app, name="data-sources")
+    add_group_alias(root_app, app, "data-source")
+    root_app.add_typer(app, name="data-sources", hidden=True)
 
 
 def get_data_sources_service():
@@ -56,6 +60,7 @@ def resolve_database_id(explicit_database_id: str | None = None) -> str:
     return ContextResolver(project_root).resolve_database_id()
 
 
+@command_alias(app, "data-source", "retrieve")
 @app.command(name="retrieve")
 def retrieve(data_source_id: str, json_output: bool = typer.Option(False, "--json")) -> None:
     try:
@@ -65,6 +70,7 @@ def retrieve(data_source_id: str, json_output: bool = typer.Option(False, "--jso
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "data-source", "query")
 @app.command(name="query")
 def query(
     data_source_id: str,
@@ -83,6 +89,7 @@ def query(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "data-source", "create")
 @app.command(name="create")
 def create(
     database_id: str | None = typer.Argument(None),
@@ -107,6 +114,7 @@ def create(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "data-source", "update")
 @app.command(name="update")
 def update(
     data_source_id: str,
@@ -125,6 +133,7 @@ def update(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(app, "data-source", "templates")
 @app.command(name="templates")
 def templates(data_source_id: str, json_output: bool = typer.Option(False, "--json")) -> None:
     try:
@@ -134,6 +143,7 @@ def templates(data_source_id: str, json_output: bool = typer.Option(False, "--js
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(property_app, "data-source", "property", "rename")
 @property_app.command(name="rename")
 def property_rename(
     data_source_id: str,
@@ -159,6 +169,7 @@ def property_rename(
     echo_json(result) if json_output else typer.echo(result)
 
 
+@command_alias(page_app, "data-source", "page", "create")
 @page_app.command(name="create")
 def page_create(
     data_source_id: str,

@@ -6,7 +6,14 @@ import pytest
 from typer.testing import CliRunner
 
 from nilo.cli import app
-from nilo.core.config import init_core_config, load_core_config
+from nilo.core.config import (
+    CoreConfig,
+    init_core_config,
+    load_core_config,
+    load_global_core_config,
+    save_core_config,
+)
+from nilo.core.project import ProjectConfigStore, ProjectSettings
 
 
 runner = CliRunner()
@@ -98,3 +105,37 @@ def test_config_local_namespace_targets_project_config(
     assert json.loads(status_result.stdout)["config"]["project_name"] == "Demo"
     assert json.loads(root_result.stdout)["project_root"] == str(tmp_path)
     assert not global_cfg_file.exists()
+
+
+# --------------------------------
+# Function Description:
+# Verifies public global CLI reads and writes never persist effective project overrides.
+# Inputs/Outputs:
+# Uses conflicting global/project versions; asserts the global file retains its own value.
+# Usage:
+# pytest tests/v2/cli/test_config_commands.py -k project_overrides
+# --------------------------------
+def test_global_cli_does_not_persist_project_overrides(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    global_file = tmp_path / "global.json"
+    save_core_config(
+        CoreConfig(notion_token="secret", notion_version="2025-09-03"),
+        path=global_file,
+    )
+    project = ProjectConfigStore.init_project(tmp_path)
+    project.settings = ProjectSettings(notion_version="2026-03-11")
+    ProjectConfigStore.save(tmp_path, project)
+    monkeypatch.setenv("NOTION_MCP_CONFIG", str(global_file))
+    monkeypatch.chdir(tmp_path)
+
+    update = runner.invoke(app, ["config", "--global", "user.name", "Ada", "--json"])
+    show = runner.invoke(app, ["config", "--global", "--show", "--json"])
+
+    assert update.exit_code == 0
+    assert show.exit_code == 0
+    stored = load_global_core_config(path=global_file)
+    assert stored.user_name == "Ada"
+    assert stored.notion_version == "2025-09-03"
+    assert json.loads(show.stdout)["notion_version"] == "2025-09-03"

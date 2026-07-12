@@ -11,6 +11,7 @@ __all__ = [
     "pages",
     "databases",
     "data_sources",
+    "database_compatibility",
     "users",
     "comments",
     "views",
@@ -18,4 +19,5 @@ __all__ = [
     "search",
     "custom_emojis",
     "raw_api",
+    "provider",
 ]

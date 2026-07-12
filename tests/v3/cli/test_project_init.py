@@ -1,3 +1,11 @@
+# File: tests/v3/cli/test_project_init.py
+# Format: UTF-8
+# =============================
+# File Description:
+# CLI tests for project initialization, credential isolation, and root ignore hygiene.
+# TAG: test, cli, project, init, gitignore
+# =============================
+
 import json
 from pathlib import Path
 
@@ -86,3 +94,25 @@ def test_local_init_alias_uses_project_init_behavior(
     assert result.exit_code == 0
     data = json.loads((tmp_path / ".notion_mcp" / "config.json").read_text(encoding="utf-8"))
     assert data["project_name"] == "Alias"
+
+
+# --------------------------------
+# Function Description:
+# Verifies CLI project init creates and idempotently maintains the root ignore entry.
+# Inputs/Outputs:
+# Invokes init and forced init; asserts one .notion_mcp/ line in root .gitignore.
+# Usage:
+# pytest tests/v3/cli/test_project_init.py -k root_gitignore
+# --------------------------------
+def test_project_init_creates_root_gitignore_entry_idempotently(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    first = runner.invoke(app, ["project", "init"])
+    forced = runner.invoke(app, ["project", "init", "--force"])
+
+    assert first.exit_code == 0
+    assert forced.exit_code == 0
+    assert (tmp_path / ".gitignore").read_text(encoding="utf-8") == ".notion_mcp/\n"

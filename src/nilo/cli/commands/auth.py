@@ -15,6 +15,7 @@ from nilo.core.client import create_notion_client
 from nilo.core.config import load_core_config
 from nilo.core.errors import CoreError
 
+from ..aliases import add_group_alias, command_alias
 from ..formatting import echo_json, exit_with_error
 
 app = typer.Typer(add_completion=False, help="Validate Notion authentication")
@@ -30,8 +31,10 @@ app = typer.Typer(add_completion=False, help="Validate Notion authentication")
 # --------------------------------
 def register(root_app: typer.Typer) -> None:
     root_app.add_typer(app, name="auth")
+    add_group_alias(root_app, app, "auth")
 
 
+@command_alias(app, "auth", "validate")
 @app.command(name="validate")
 # --------------------------------
 # Function Description:
@@ -58,6 +61,7 @@ def validate(json_output: bool = typer.Option(False, "--json", help="Print JSON 
         typer.echo(f"Valid: {'yes' if result.valid else 'no'}")
 
 
+@command_alias(app, "auth", "whoami")
 @app.command(name="whoami")
 # --------------------------------
 # Function Description:

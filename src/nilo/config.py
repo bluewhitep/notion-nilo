@@ -1,96 +1,99 @@
-"""
-Configuration management module.
-
-Provides functions for reading and writing the global configuration file,
-including Notion integration token and user UUID fields. The default file is
-``~/.notion_mcp/config.json`` and can be overridden with ``NOTION_MCP_CONFIG``.
-"""
+# File: src/nilo/config.py
+# Format: UTF-8
+# =============================
+# File Description:
+# Legacy configuration API delegating persistence and validation to Core.
+# TAG: compatibility, config, core
+# =============================
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Optional
 
-from .models import Config
+from nilo.core.config import (
+    DEFAULT_CONFIG_DIR,
+    DEFAULT_CONFIG_FILE,
+    CoreConfig,
+    config_path_from_env,
+    load_global_core_config,
+    save_core_config,
+    update_core_config,
+)
+from nilo.core.errors import ConfigNotFoundError
+
+Config = CoreConfig
 
 
-# Default configuration directory and file name.
-DEFAULT_CONFIG_DIR = Path.home() / ".notion_mcp"
-DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.json"
-
-
+# --------------------------------
+# Function Description:
+# Returns the Core-owned global configuration file path.
+# Inputs/Outputs:
+# No input; returns a filesystem Path.
+# Usage:
+# get_config_path()
+# --------------------------------
 def get_config_path() -> Path:
-    """Return the configuration file path.
-
-    Uses ``NOTION_MCP_CONFIG`` when set; otherwise uses the default path.
-    """
-    from os import getenv
-
-    env_path = getenv("NOTION_MCP_CONFIG")
-    if env_path:
-        return Path(env_path).expanduser()
-    return DEFAULT_CONFIG_FILE
+    return config_path_from_env()
 
 
-def load_config(path: Optional[Path] = None) -> Config:
-    """Load the configuration file and return a ``Config`` instance.
-
-    Args:
-        path: Configuration file path, defaulting to ``get_config_path()``.
-
-    Returns:
-        ``Config``: Parsed configuration object.
-
-    Raises:
-        FileNotFoundError: Raised when the configuration file does not exist.
-        json.JSONDecodeError: Raised when the configuration file is not valid JSON.
-    """
-    cfg_path = path or get_config_path()
-    if not cfg_path.exists():
-        raise FileNotFoundError(f"Configuration file does not exist: {cfg_path}")
-    with cfg_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-    return Config.model_validate(data)
-
-
-def save_config(config: Config, path: Optional[Path] = None) -> None:
-    """Serialize a ``Config`` object to the target path.
-
-    Creates the parent directory when needed.
-
-    Args:
-        config: Configuration object to save.
-        path: Destination path, defaulting to ``get_config_path()``.
-    """
-    cfg_path = path or get_config_path()
-    cfg_path.parent.mkdir(parents=True, exist_ok=True)
-    data = config.model_dump(exclude_none=True)
-    with cfg_path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def set_token(token: str, path: Optional[Path] = None) -> None:
-    """Update the Notion token in configuration.
-
-    Creates a new configuration object when the file does not exist.
-    """
+# --------------------------------
+# Function Description:
+# Loads configuration through Core while preserving the legacy missing-file exception.
+# Inputs/Outputs:
+# Optional path; returns CoreConfig or raises FileNotFoundError when absent.
+# Usage:
+# load_config(path=Path("config.json"))
+# --------------------------------
+def load_config(path: Path | None = None) -> Config:
     try:
-        cfg = load_config(path)
-    except FileNotFoundError:
-        cfg = Config()
-    cfg.notion_token = token
-    save_config(cfg, path)
+        return load_global_core_config(path=path)
+    except ConfigNotFoundError as exc:
+        raise FileNotFoundError(str(exc)) from exc
 
 
-def set_user(user_id: str, path: Optional[Path] = None) -> None:
-    """Update the current user UUID in configuration.
+# --------------------------------
+# Function Description:
+# Saves configuration through the Core persistence contract.
+# Inputs/Outputs:
+# Input CoreConfig and optional path; writes the configuration file.
+# Usage:
+# save_config(Config(notion_token="secret"))
+# --------------------------------
+def save_config(config: Config, path: Path | None = None) -> None:
+    save_core_config(config, path=path)
 
-    Creates a new configuration object when the file does not exist.
-    """
-    try:
-        cfg = load_config(path)
-    except FileNotFoundError:
-        cfg = Config()
-    cfg.user_id = user_id
-    save_config(cfg, path)
+
+# --------------------------------
+# Function Description:
+# Updates the Notion token through the Core configuration API.
+# Inputs/Outputs:
+# Input token and optional path; writes the merged Core configuration.
+# Usage:
+# set_token("secret")
+# --------------------------------
+def set_token(token: str, path: Path | None = None) -> None:
+    update_core_config(path=path, notion_token=token)
+
+
+# --------------------------------
+# Function Description:
+# Updates the Notion user UUID through the Core configuration API.
+# Inputs/Outputs:
+# Input UUID string and optional path; writes the merged Core configuration.
+# Usage:
+# set_user("00000000-0000-0000-0000-000000000000")
+# --------------------------------
+def set_user(user_id: str, path: Path | None = None) -> None:
+    update_core_config(path=path, user_id=user_id)
+
+
+__all__ = [
+    "Config",
+    "DEFAULT_CONFIG_DIR",
+    "DEFAULT_CONFIG_FILE",
+    "get_config_path",
+    "load_config",
+    "save_config",
+    "set_token",
+    "set_user",
+]

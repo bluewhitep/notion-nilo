@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 
+from nilo.core.config_constants import SUPPORTED_TRANSPORTS
 from nilo.mcp_server.server import serve
+from nilo.runtime.server_process import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_TRANSPORT
 
 
 # --------------------------------
@@ -23,9 +25,9 @@ from nilo.mcp_server.server import serve
 # --------------------------------
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the Notion MCP server process")
-    parser.add_argument("--transport", default="streamable-http", choices=["streamable-http", "stdio"])
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--transport", default=DEFAULT_TRANSPORT, choices=SUPPORTED_TRANSPORTS)
+    parser.add_argument("--host", default=DEFAULT_HOST)
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     return parser.parse_args()
 
 

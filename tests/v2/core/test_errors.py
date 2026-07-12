@@ -1,3 +1,5 @@
+import json
+
 from nilo.core.errors import (
     ConfigNotFoundError,
     CoreError,
@@ -28,3 +30,14 @@ def test_specialized_errors_keep_codes() -> None:
         NotionOperationError("pages.retrieve", "failed").to_dict()["code"]
         == "notion_operation_failed"
     )
+
+
+def test_core_error_details_are_always_json_serializable() -> None:
+    payload = CoreError(
+        "Invalid value",
+        details={"errors": [{"context": ValueError("bad value")}]},
+    ).to_dict()
+
+    assert json.loads(json.dumps(payload))["details"] == {
+        "errors": [{"context": "bad value"}]
+    }

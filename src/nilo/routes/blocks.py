@@ -1,65 +1,86 @@
-"""
-Block-related routes.
-
-Provides operations for listing, updating, and appending block children.
-"""
+# File: src/nilo/routes/blocks.py
+# Format: UTF-8
+# =============================
+# File Description:
+# Legacy block REST routes delegating all Notion operations to Core services.
+# TAG: rest, routes, blocks, core
+# =============================
 
 from __future__ import annotations
 
-from typing import Any, Dict, cast
+from typing import Any, cast
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends
 
-try:
-    from notion_client import APIResponseError, Client as NotionClient  # type: ignore
-except ImportError:
-    from typing import Any
+from nilo.core.errors import CoreError
+from nilo.core.services.blocks import BlocksService
 
-    APIResponseError = Exception  # type: ignore
-    NotionClient = Any  # type: ignore
-
-from ..dependencies import get_notion_client
+from ..dependencies import get_blocks_service, raise_core_http_error
 
 
 router = APIRouter(prefix="/blocks", tags=["blocks"])
 
 
 @router.get("/{block_id}/children")
+# --------------------------------
+# Function Description:
+# Lists child blocks through the Core blocks service.
+# Inputs/Outputs:
+# Input block id and injected service; returns Notion child listing response.
+# Usage:
+# GET /blocks/{block_id}/children
+# --------------------------------
 async def list_block_children(
     block_id: str,
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """List child blocks for a block."""
+    service: BlocksService = Depends(get_blocks_service),
+) -> dict[str, Any]:
     try:
-        result = client.blocks.children.list(block_id=block_id)  # type: ignore[attr-defined]
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.list_children(block_id)
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.post("/{block_id}/append")
+# --------------------------------
+# Function Description:
+# Appends child blocks through the Core blocks service.
+# Inputs/Outputs:
+# Input block id, JSON body, and injected service; returns append response.
+# Usage:
+# POST /blocks/{block_id}/append
+# --------------------------------
 async def append_block_children(
     block_id: str,
-    body: Dict[str, Any] = Body(...),
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Append child blocks to a block. ``body`` should include ``children``."""
+    body: dict[str, Any] = Body(...),
+    service: BlocksService = Depends(get_blocks_service),
+) -> dict[str, Any]:
+    children = body.get("children")
+    params = {key: value for key, value in body.items() if key != "children"}
     try:
-        result = client.blocks.children.append(block_id=block_id, **body)  # type: ignore[attr-defined]
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.append_children(
+            block_id,
+            children=cast(list[dict[str, Any]], children),
+            **params,
+        )
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.patch("/{block_id}")
+# --------------------------------
+# Function Description:
+# Updates a block through the Core blocks service.
+# Inputs/Outputs:
+# Input block id, JSON body, and injected service; returns Notion update response.
+# Usage:
+# PATCH /blocks/{block_id}
+# --------------------------------
 async def update_block(
     block_id: str,
-    body: Dict[str, Any] = Body(...),
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Update block content with fields matching the block type."""
+    body: dict[str, Any] = Body(...),
+    service: BlocksService = Depends(get_blocks_service),
+) -> dict[str, Any]:
     try:
-        result = client.blocks.update(block_id=block_id, **body)  # type: ignore[attr-defined]
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.update(block_id, body)
+    except CoreError as exc:
+        raise_core_http_error(exc)

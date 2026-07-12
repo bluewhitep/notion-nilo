@@ -1,75 +1,79 @@
-"""
-Page-related routes.
-
-Provides page retrieval, creation, and update operations.
-"""
+# File: src/nilo/routes/pages.py
+# Format: UTF-8
+# =============================
+# File Description:
+# Legacy page REST routes delegating all Notion operations to Core services.
+# TAG: rest, routes, pages, core
+# =============================
 
 from __future__ import annotations
 
-from typing import Any, Dict, cast
+from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends
 
-try:
-    from notion_client import APIResponseError, Client as NotionClient  # type: ignore
-except ImportError:
-    from typing import Any
+from nilo.core.errors import CoreError
+from nilo.core.services.pages import PagesService
 
-    APIResponseError = Exception  # type: ignore
-    NotionClient = Any  # type: ignore
-
-from ..dependencies import get_notion_client
+from ..dependencies import get_pages_service, raise_core_http_error
 
 
 router = APIRouter(prefix="/pages", tags=["pages"])
 
 
 @router.get("/{page_id}")
+# --------------------------------
+# Function Description:
+# Retrieves a page through the Core pages service.
+# Inputs/Outputs:
+# Input page id and injected service; returns Notion page response.
+# Usage:
+# GET /pages/{page_id}
+# --------------------------------
 async def get_page(
     page_id: str,
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Retrieve page details."""
+    service: PagesService = Depends(get_pages_service),
+) -> dict[str, Any]:
     try:
-        result = client.pages.retrieve(page_id=page_id)
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.retrieve(page_id)
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.post("/")
+# --------------------------------
+# Function Description:
+# Creates a page through the Core pages service.
+# Inputs/Outputs:
+# Input JSON body and injected service; returns Notion create response.
+# Usage:
+# POST /pages
+# --------------------------------
 async def create_page(
-    body: Dict[str, Any] = Body(...),
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Create a new page.
-
-    Example body:
-
-    ```json
-    {
-      "parent": {"data_source_id": "..."},
-      "properties": {"Name": {"title": [{"text": {"content": "Example"}}]}},
-      "children": []
-    }
-    ```
-    """
+    body: dict[str, Any] = Body(...),
+    service: PagesService = Depends(get_pages_service),
+) -> dict[str, Any]:
     try:
-        result = client.pages.create(**body)
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.create(body)
+    except CoreError as exc:
+        raise_core_http_error(exc)
 
 
 @router.patch("/{page_id}")
+# --------------------------------
+# Function Description:
+# Updates a page through the Core pages service.
+# Inputs/Outputs:
+# Input page id, JSON body, and injected service; returns Notion update response.
+# Usage:
+# PATCH /pages/{page_id}
+# --------------------------------
 async def update_page(
     page_id: str,
-    body: Dict[str, Any] = Body(...),
-    client: NotionClient = Depends(get_notion_client),
-) -> Dict[str, Any]:
-    """Update page properties."""
+    body: dict[str, Any] = Body(...),
+    service: PagesService = Depends(get_pages_service),
+) -> dict[str, Any]:
     try:
-        result = client.pages.update(page_id=page_id, **body)
-        return cast(Dict[str, Any], result)
-    except APIResponseError as err:
-        raise HTTPException(status_code=err.status, detail=str(err))
+        return service.update(page_id, body)
+    except CoreError as exc:
+        raise_core_http_error(exc)

@@ -2,7 +2,7 @@
 # Format: UTF-8
 # =============================
 # File Description:
-# Project-level .notion_mcp configuration models and storage operations.
+# Credential-free project configuration models, overrides, and storage operations.
 # TAG: core, project, config
 # =============================
 
@@ -16,6 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from nilo.core.config_constants import SUPPORTED_TRANSPORTS
 from nilo.core.errors import (
     ProjectAlreadyInitializedError,
     ProjectConfigNotFoundError,
@@ -25,6 +26,14 @@ from nilo.core.errors import (
 from .project_paths import ProjectPaths
 
 DEFAULT_PROJECT_GITIGNORE = "state/\ncache/\nlogs/\n"
+PROJECT_ROOT_GITIGNORE_ENTRY = ".notion_mcp/"
+PROJECT_CORE_OVERRIDE_FIELDS = {
+    "notion_version",
+    "timeout_ms",
+    "retry",
+    "default_transport",
+    "audit_enabled",
+}
 PROJECT_FILE_MODE = 0o644
 PRIVATE_PROJECT_FILE_MODE = 0o600
 
@@ -35,6 +44,64 @@ class ProjectSettings(BaseModel):
     prefer_attached_page: bool = True
     prefer_attached_database: bool = True
     json_output_default: bool = False
+    notion_version: str | None = None
+    timeout_ms: int | None = Field(default=None, ge=1)
+    retry: bool | None = None
+    default_transport: str | None = None
+    audit_enabled: bool | None = None
+
+    # --------------------------------
+    # Function Description:
+    # Validates an optional project-level Notion API version override.
+    # Inputs/Outputs:
+    # Input optional version; returns a stripped version or None.
+    # Usage:
+    # ProjectSettings(notion_version="YYYY-MM-DD")
+    # --------------------------------
+    @field_validator("notion_version")
+    @classmethod
+    def validate_notion_version(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("notion_version cannot be empty")
+        return stripped
+
+    # --------------------------------
+    # Function Description:
+    # Validates an optional project transport override against the Core whitelist.
+    # Inputs/Outputs:
+    # Input optional transport; returns normalized stdio/streamable-http or None.
+    # Usage:
+    # ProjectSettings(default_transport="stdio")
+    # --------------------------------
+    @field_validator("default_transport")
+    @classmethod
+    def validate_default_transport(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if normalized not in SUPPORTED_TRANSPORTS:
+            raise ValueError(
+                "default_transport must be one of: "
+                f"{', '.join(sorted(SUPPORTED_TRANSPORTS))}"
+            )
+        return normalized
+
+    # --------------------------------
+    # Function Description:
+    # Returns only credential-free fields allowed to override global Core config.
+    # Inputs/Outputs:
+    # No input; returns explicitly configured non-sensitive Core setting values.
+    # Usage:
+    # ProjectSettings(retry=False).core_overrides()
+    # --------------------------------
+    def core_overrides(self) -> dict[str, Any]:
+        return self.model_dump(
+            include=PROJECT_CORE_OVERRIDE_FIELDS,
+            exclude_none=True,
+        )
 
 
 class ProjectConfig(BaseModel):
@@ -125,12 +192,28 @@ def atomic_write_json(path: Path, payload: dict[str, Any], *, mode: int = PROJEC
             tmp_path.unlink()
 
 
+# --------------------------------
+# Function Description:
+# Adds one exact ignore entry without replacing existing .gitignore content.
+# Inputs/Outputs:
+# Input .gitignore path and entry; creates or incrementally updates the file.
+# Usage:
+# ensure_gitignore_entry(Path(".gitignore"), ".notion_mcp/")
+# --------------------------------
+def ensure_gitignore_entry(path: Path, entry: str) -> None:
+    content = path.read_bytes().decode("utf-8") if path.exists() else ""
+    if entry in content.splitlines():
+        return
+    separator = "" if not content or content.endswith(("\n", "\r")) else "\n"
+    path.write_text(f"{content}{separator}{entry}\n", encoding="utf-8")
+
+
 class ProjectConfigStore:
     # --------------------------------
     # Function Description:
     # Creates a default project configuration directory and config file.
     # Inputs/Outputs:
-    # Input project root and metadata; returns the saved ProjectConfig.
+    # Input project root/home and metadata; returns ProjectConfig or rejects the user home.
     # Usage:
     # ProjectConfigStore.init_project(Path.cwd(), project_name="Demo")
     # --------------------------------
@@ -142,12 +225,20 @@ class ProjectConfigStore:
         workspace_hint: str | None = None,
         force: bool = False,
         private: bool = False,
+        home: Path | None = None,
     ) -> ProjectConfig:
         root = Path(project_root).expanduser().resolve()
+        home_dir = (Path.home() if home is None else Path(home)).expanduser().resolve()
+        if root == home_dir:
+            raise ProjectConfigValidationError(
+                "User home is reserved for global configuration and cannot be a project root",
+                details={"project_root": str(root)},
+            )
         paths = ProjectPaths(root)
         if paths.config_file.exists() and not force:
             raise ProjectAlreadyInitializedError(str(paths.config_file))
         root.mkdir(parents=True, exist_ok=True)
+        ensure_gitignore_entry(paths.root_gitignore_file, PROJECT_ROOT_GITIGNORE_ENTRY)
         paths.project_dir.mkdir(parents=True, exist_ok=True)
         paths.state_dir.mkdir(parents=True, exist_ok=True)
         paths.cache_dir.mkdir(parents=True, exist_ok=True)

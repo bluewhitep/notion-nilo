@@ -6,7 +6,22 @@
 # TAG: core, package
 # =============================
 
-from .config import CoreConfig, DEFAULT_NOTION_VERSION
+from .config import (
+    CoreConfig,
+    DEFAULT_NOTION_VERSION,
+    load_core_config,
+    load_global_core_config,
+    resolve_config_locations,
+)
 from .errors import CoreError
+from .project import ConfigLocations
 
-__all__ = ["CoreConfig", "CoreError", "DEFAULT_NOTION_VERSION"]
+__all__ = [
+    "ConfigLocations",
+    "CoreConfig",
+    "CoreError",
+    "DEFAULT_NOTION_VERSION",
+    "load_core_config",
+    "load_global_core_config",
+    "resolve_config_locations",
+]

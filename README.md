@@ -2,16 +2,19 @@
 
 [![CI](https://github.com/bluewhitep/notion-nilo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bluewhitep/notion-nilo/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue.svg)](pyproject.toml) [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#status) [![Docs](https://img.shields.io/badge/docs-EN%20%7C%20JP%20%7C%20ZH-blue.svg)](https://bluewhitep.github.io/notion-nilo/)
 
-N.I.L.O. - Notion Interfaces, Locally Operated - provides a local Notion runtime with a Core + CLI + MCP Tool architecture.
+N.I.L.O. - Notion Interfaces, Locally Operated - provides a local Notion runtime with shared Core/Runtime modules and thin CLI/MCP adapters.
 
 Web docs: [bluewhitep.github.io/notion-nilo](https://bluewhitep.github.io/notion-nilo/)
 
 ## Status
 
-- Core is the only business logic layer.
-- CLI is the git-like human entrypoint.
-- MCP tools are the structured Agent/LLM entrypoint.
+- Core owns shared business logic; Runtime owns shared process and execution lifecycle behavior.
+- CLI is the git-like human and Function Calling entrypoint, with explicit short aliases and stable `--json` errors.
+- MCP tools are the structured Agent/LLM entrypoint and reuse Core/Runtime capabilities.
 - Background MCP server lifecycle commands are available through `nilo server ...`.
+- Local MCP clients use stdio; URL-based local or remote clients use Streamable HTTP. Legacy SSE is not supported.
+
+Remote deployment guidance, authentication, TLS, and reverse-proxy configuration are deferred; current HTTP examples bind to localhost only.
 
 The project is in alpha. Public APIs, CLI commands, and MCP tool contracts may still change before a stable release.
 
@@ -61,7 +64,7 @@ Web documentation is deployed with GitHub Pages:
 
 - [Documentation site](https://bluewhitep.github.io/notion-nilo/)
 
-Repository documentation is organized by language. The Chinese tree is the source for content decisions:
+Repository documentation is organized by language. The English tree is the source for content decisions:
 
 - [中文](Docs/ZH/README.md)
 - [English](Docs/EN/README.md)

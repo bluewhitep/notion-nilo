@@ -41,6 +41,8 @@ def register(server: FastMCP) -> None:
         except ConfigNotFoundError:
             public = {}
             configured = False
+        except CoreError as exc:
+            return core_error_payload(exc)
         return {
             "configured": configured,
             "config": public,

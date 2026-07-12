@@ -3,7 +3,9 @@ import json
 import pytest
 
 from nilo.mcp_server.server import create_mcp_server
+from nilo.mcp_server.tools import config as config_tools
 from nilo.mcp_server.tools import pages
+from nilo.core.errors import ConfigValidationError
 
 
 class FakePagesService:
@@ -63,3 +65,18 @@ async def test_config_status_tool_returns_structured_result(tmp_path, monkeypatc
     payload = text_result_to_json(result)
     assert payload["configured"] is False
     assert payload["capabilities"]["core"] is True
+
+
+@pytest.mark.asyncio
+async def test_config_status_tool_returns_core_error_for_invalid_config(monkeypatch) -> None:
+    def invalid_config():
+        raise ConfigValidationError("invalid test config")
+
+    monkeypatch.setattr(config_tools, "load_core_config", invalid_config)
+
+    result = await create_mcp_server().call_tool("config_status", {})
+
+    payload = text_result_to_json(result)
+    assert payload["ok"] is False
+    assert payload["error"]["type"] == "ConfigValidationError"
+    assert payload["error"]["code"] == "config_validation_failed"

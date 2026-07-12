@@ -19,6 +19,7 @@ from nilo.core.identifiers import parse_notion_page_id
 from nilo.core.models import dry_run_result
 from nilo.core.project import ProjectPaths, ProjectResolver
 
+from ..aliases import add_group_alias, command_alias
 from ..core_services import (
     get_blocks_service as _get_blocks_service,
     get_databases_service as _get_databases_service,
@@ -43,7 +44,8 @@ def register(root_app: typer.Typer) -> None:
     app.add_typer(page_block_app, name="block", hidden=True)
     app.add_typer(page_insert_app, name="insert", hidden=True)
     root_app.add_typer(app, name="page")
-    root_app.add_typer(app, name="pages")
+    add_group_alias(root_app, app, "page")
+    root_app.add_typer(app, name="pages", hidden=True)
 
 
 # --------------------------------
@@ -206,6 +208,7 @@ def print_page_content(result: dict[str, object]) -> None:
         typer.echo(f'{index}. [{block_type}] block_id={block_id} "{text}"')
 
 
+@command_alias(app, "page", "attach")
 @app.command(name="attach")
 # --------------------------------
 # Function Description:
@@ -251,6 +254,7 @@ def attach_page(
         typer.echo(f"  {ProjectPaths(project_root).page_attachment_file}")
 
 
+@command_alias(app, "page", "status")
 @app.command(name="status")
 @app.command(name="current", hidden=True)
 # --------------------------------
@@ -274,6 +278,7 @@ def page_status(
         print_page_attachment_status(project_root, attachment)
 
 
+@command_alias(app, "page", "refresh")
 @app.command(name="refresh")
 # --------------------------------
 # Function Description:
@@ -299,6 +304,7 @@ def page_refresh(
         print_page_attachment_status(project_root, updated)
 
 
+@command_alias(app, "page", "detach")
 @app.command(name="detach")
 @app.command(name="deattach", hidden=True)
 # --------------------------------
@@ -358,6 +364,7 @@ def page_content(
         print_page_content(result)
 
 
+@command_alias(app, "page", "blocks")
 @app.command(name="blocks")
 # --------------------------------
 # Function Description:
@@ -601,6 +608,7 @@ def _parent_id_for_append(block: dict[str, object]) -> str:
     raise CoreError("Cannot determine parent for target block", details={"block": block})
 
 
+@command_alias(app, "page", "retrieve")
 @app.command(name="retrieve")
 # --------------------------------
 # Function Description:
@@ -625,6 +633,7 @@ def retrieve_page(
         typer.echo(result)
 
 
+@command_alias(app, "page", "create")
 @app.command(name="create")
 # --------------------------------
 # Function Description:
@@ -654,6 +663,7 @@ def create_page(
         typer.echo(result)
 
 
+@command_alias(app, "page", "update")
 @app.command(name="update")
 # --------------------------------
 # Function Description:
@@ -684,6 +694,7 @@ def update_page(
         typer.echo(result)
 
 
+@command_alias(app, "page", "trash")
 @app.command(name="trash")
 # --------------------------------
 # Function Description:

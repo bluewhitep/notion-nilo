@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from nilo.mcp_server import process_manager
+from nilo.mcp_server import process_manager as compatibility_process_manager
+from nilo.runtime import server_process as process_manager
 
 
 class FakeProcess:
@@ -12,6 +13,45 @@ class FakeProcess:
 
     def poll(self):
         return None
+
+
+class FakeCompletedProcess:
+    def __init__(self, returncode: int = 0) -> None:
+        self.returncode = returncode
+
+
+def test_mcp_process_manager_reexports_runtime_contract() -> None:
+    assert compatibility_process_manager.ServerRuntimeState is process_manager.ServerRuntimeState
+    assert compatibility_process_manager.start_background_server is process_manager.start_background_server
+    assert compatibility_process_manager.run_foreground_stdio_server is process_manager.run_foreground_stdio_server
+
+
+def test_foreground_stdio_server_inherits_process_streams(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr(process_manager.subprocess, "run", fake_run)
+
+    process_manager.run_foreground_stdio_server()
+
+    assert "nilo.mcp_server.runner" in captured["command"]
+    assert captured["command"][captured["command"].index("--transport") + 1] == "stdio"
+    assert captured["kwargs"] == {"check": False}
+
+
+def test_foreground_stdio_server_wraps_nonzero_exit(monkeypatch) -> None:
+    monkeypatch.setattr(
+        process_manager.subprocess,
+        "run",
+        lambda command, **kwargs: FakeCompletedProcess(returncode=3),
+    )
+
+    with pytest.raises(process_manager.ServerProcessError, match="exited with code 3"):
+        process_manager.run_foreground_stdio_server()
 
 
 def test_start_background_server_writes_state(monkeypatch, tmp_path: Path) -> None:

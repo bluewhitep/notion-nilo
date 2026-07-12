@@ -13,6 +13,7 @@ import typer
 from nilo.core.errors import CoreError
 from nilo.core.models import dry_run_result
 
+from ..aliases import add_group_alias, command_alias
 from ..core_services import get_blocks_service as _get_blocks_service
 from ..formatting import echo_json, exit_with_error, parse_json_object
 
@@ -29,7 +30,8 @@ app = typer.Typer(add_completion=False, help="Block operations")
 # --------------------------------
 def register(root_app: typer.Typer) -> None:
     root_app.add_typer(app, name="block")
-    root_app.add_typer(app, name="blocks")
+    add_group_alias(root_app, app, "block")
+    root_app.add_typer(app, name="blocks", hidden=True)
 
 
 # --------------------------------
@@ -44,6 +46,7 @@ def get_blocks_service():
     return _get_blocks_service()
 
 
+@command_alias(app, "block", "children")
 @app.command(name="children")
 # --------------------------------
 # Function Description:
@@ -67,6 +70,7 @@ def children(
         typer.echo(result)
 
 
+@command_alias(app, "block", "append")
 @app.command(name="append")
 # --------------------------------
 # Function Description:
@@ -103,6 +107,7 @@ def append(
         typer.echo(result)
 
 
+@command_alias(app, "block", "insert-after")
 @app.command(name="insert-after")
 # --------------------------------
 # Function Description:
@@ -136,6 +141,7 @@ def insert_after(
         typer.echo(result)
 
 
+@command_alias(app, "block", "update")
 @app.command(name="update")
 # --------------------------------
 # Function Description:
@@ -165,6 +171,7 @@ def update(
         typer.echo(result)
 
 
+@command_alias(app, "block", "trash")
 @app.command(name="trash")
 # --------------------------------
 # Function Description:

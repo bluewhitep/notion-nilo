@@ -12,11 +12,11 @@
 ## 核心边界
 
 ```text
-CLI -> Core -> Notion SDK/API
-MCP Tool -> Core -> Notion SDK/API
+CLI -> Core 或 Runtime
+MCP -> Core 或 Runtime
 ```
 
-CLI 不应直接调用 Notion SDK。新增命令时，应先确认对应 Core service 能力；如果 Core 缺失，应先补 Core，再接 CLI。
+CLI 不得直接调用 Notion SDK，也不得导入 MCP 适配层。通用业务能力属于 Core，通用进程/执行能力属于 Runtime；Core/Runtime 不得反向导入 CLI 或 MCP。新增命令时应先确认对应通用能力已经存在；CLI 模块只定义 CLI 特有的参数解析、展示和交互。
 
 ## 公开 Root 命令
 
@@ -37,6 +37,32 @@ CLI 不应直接调用 Notion SDK。新增命令时，应先确认对应 Core se
   - 输出当前项目级配置摘要。
 
 `project`、`local`、root `status`、`config global/local` 和 `config set/get/unset/list` 只保留为隐藏兼容入口，不属于公开命令面。
+
+CLI 使用类似 Git/gh 的作用域：全局命令可以在任意目录运行；项目级命令从当前目录向上查找最近的 `.notion_mcp/`，最多查到用户根目录。
+
+## 短别名契约
+
+每个公开规范命令路径都有一个显式英文字母别名，长度不超过六个字符。规范全称仍是文档主接口；短别名调用相同 callback，并在普通 help 中隐藏以保持帮助简洁。
+
+Root 示例：
+
+| 全称 | 别名 |
+| --- | --- |
+| `init` | `ini` |
+| `version` | `ver` |
+| `config` | `cfg` |
+| `pwd` | `cwd` |
+| `page` | `pg` |
+| `block` | `blk` |
+| `database` | `db` |
+| `data-source` | `ds` |
+| `server` | `srv` |
+
+Leaf 示例包括 `retrieve -> get`、`create -> new`、`update -> upd`、`trash -> del` 和 `server run -> server start`。完整且经过校验的映射定义在 `src/nilo/cli/aliases.py`。
+
+## Function Calling 错误契约
+
+只要调用参数中任意位置出现 `--json`，Click/Typer 用法错误就输出为一行紧凑 JSON。稳定 envelope 包含 `ok=false`，以及带有 `type`、`code`、`message`、`details.exit_code` 的 `error` object。稳定用法错误码包括 `cli_missing_parameter`、`cli_invalid_parameter`、`cli_unknown_option` 和 `cli_usage_error`。不带 `--json` 的人类调用继续使用普通 help 和错误格式。
 
 ## Project Context
 
@@ -69,6 +95,8 @@ Attach state：
 ```
 
 项目级配置和 attach state 不得保存 token。
+
+项目级配置只能覆盖非敏感 Core 设置，全局凭据始终保存在全局配置中。项目初始化拒绝把用户根目录作为项目根，并在项目根 `.gitignore` 中增量加入 `.notion_mcp/`。
 
 ## Page CLI
 

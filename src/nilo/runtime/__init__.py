@@ -1,12 +1,12 @@
-# File: src/nilo/mcp_server/process_manager.py
+# File: src/nilo/runtime/__init__.py
 # Format: UTF-8
 # =============================
 # File Description:
-# Compatibility re-exports for the runtime-owned server process contract.
-# TAG: mcp, compatibility, runtime, process
+# Public runtime contracts shared by CLI and server adapters.
+# TAG: runtime, public-api
 # =============================
 
-from nilo.runtime.server_process import (
+from .server_process import (
     DEFAULT_HOST,
     DEFAULT_LOG_FILE_NAME,
     DEFAULT_PORT,

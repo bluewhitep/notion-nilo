@@ -2,6 +2,12 @@
 
 本文说明本地 MCP server 的启动、停止、状态、日志和清理命令。
 
+## Transport 契约
+
+只支持 `stdio` 和 `streamable-http`。本地命令型 MCP client 使用 stdio；通过 URL 连接的本地或远程 MCP client 使用 Streamable HTTP。不支持 legacy SSE。
+
+本版本只覆盖 localhost server 运行。远程部署、认证、TLS 和反向代理配置本轮延期；不要把无认证的示例 endpoint 暴露到网络。
+
 ## 后台 HTTP Server
 
 | 命令 | 作用 |
@@ -48,6 +54,16 @@ nilo server stdio
 ```
 
 这个命令是前台进程。它会一直运行，直到 MCP client 关闭它，或用户在终端里按 `Ctrl+C`。
+
+## 短别名
+
+Server 命令有显式短别名，包括 `server/srv`、`run/start`、`stdio/pipe`、`status/stat`、`stop/halt`、`logs/tail` 和 `remove/rm`。
+
+```bash
+nilo srv start --host 127.0.0.1 --port 8000
+nilo srv stat
+nilo srv pipe
+```
 
 ## Serve Alias
 

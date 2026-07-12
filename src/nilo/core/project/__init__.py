@@ -7,11 +7,12 @@
 # =============================
 
 from .project_config import ProjectConfig, ProjectConfigStore, ProjectSettings
-from .project_paths import PROJECT_DIR_NAME, ProjectPaths
+from .project_paths import PROJECT_DIR_NAME, ConfigLocations, ProjectPaths
 from .project_resolver import ProjectResolver
 
 __all__ = [
     "PROJECT_DIR_NAME",
+    "ConfigLocations",
     "ProjectConfig",
     "ProjectConfigStore",
     "ProjectPaths",

@@ -14,6 +14,7 @@ from nilo import __version__
 from nilo.core.config import DEFAULT_NOTION_VERSION, load_core_config
 from nilo.core.errors import ConfigNotFoundError
 
+from ..aliases import command_alias
 from ..formatting import echo_json
 
 
@@ -30,6 +31,7 @@ def register(app: typer.Typer) -> None:
         name="version",
         help="Show Notion MCP and configured Notion API versions",
     )(version_command)
+    command_alias(app, "version")(version_command)
 
 
 # --------------------------------

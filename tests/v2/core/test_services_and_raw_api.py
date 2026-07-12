@@ -1,4 +1,6 @@
+import ast
 import importlib
+from pathlib import Path
 
 import pytest
 
@@ -6,6 +8,8 @@ from nilo.core.errors import NotionOperationError
 from nilo.core.services.blocks import BlocksService
 from nilo.core.services.pages import PagesService
 from nilo.core.services.raw_api import RawNotionService, registered_operations
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 class Recorder:
@@ -133,6 +137,49 @@ def test_service_modules_do_not_import_cli_or_mcp_layers() -> None:
         source = getattr(module, "__file__", "")
         assert "/cli/" not in source
         assert "/mcp_server/" not in source
+
+
+# --------------------------------
+# Function Description:
+# Returns absolute modules imported by one Python source file.
+# Inputs/Outputs:
+# Input source path; returns module names from import and from-import statements.
+# Usage:
+# imported_modules(Path("src/nilo/core/config.py"))
+# --------------------------------
+def imported_modules(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            modules.add(node.module)
+    return modules
+
+
+# --------------------------------
+# Function Description:
+# Enforces one-way Core/Runtime and adapter-layer import boundaries across all source files.
+# Inputs/Outputs:
+# No input; asserts Core/Runtime never depend on adapters and CLI/MCP never depend on each other.
+# Usage:
+# pytest tests/v2/core/test_services_and_raw_api.py -k layer_import_boundaries
+# --------------------------------
+def test_layer_import_boundaries() -> None:
+    forbidden_by_layer = {
+        "core": ("nilo.cli", "nilo.mcp_server"),
+        "runtime": ("nilo.cli", "nilo.mcp_server"),
+        "cli": ("nilo.mcp_server",),
+        "mcp_server": ("nilo.cli",),
+    }
+
+    for layer, forbidden_prefixes in forbidden_by_layer.items():
+        for path in sorted((REPO_ROOT / "src" / "nilo" / layer).rglob("*.py")):
+            for module in imported_modules(path):
+                assert not module.startswith(forbidden_prefixes), (
+                    f"{path.relative_to(REPO_ROOT)} imports forbidden layer {module}"
+                )
 
 
 def test_raw_api_invokes_only_registered_operations() -> None:
